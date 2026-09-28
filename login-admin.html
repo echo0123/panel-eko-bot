@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin System | Panel Eko</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #09090b; 
+            background-image: linear-gradient(45deg, #09090b 25%, #18181b 100%);
+        }
+        .admin-panel {
+            background: rgba(24, 24, 27, 0.8);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(139, 92, 246, 0.4); 
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.15);
+        }
+        .admin-input:focus {
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.6);
+            border-color: #8b5cf6;
+        }
+    </style>
+</head>
+<body class="h-screen flex items-center justify-center text-zinc-300 font-mono">
+
+    <div class="admin-panel w-full max-w-md p-10 rounded-none border-l-4 border-l-violet-500 relative">
+        <div class="text-left mb-10 border-b border-zinc-800 pb-4">
+            <h2 class="text-2xl font-black tracking-widest text-white">SYSTEM<span class="text-violet-500">.ADMIN</span></h2>
+            <p class="text-xs text-zinc-500 mt-1">PANEL EKO // ROOT ACCESS</p>
+        </div>
+
+        <form id="adminLoginForm" class="space-y-6">
+            <div>
+                <label class="block text-xs font-bold text-violet-400 mb-2 uppercase">Root Identity</label>
+                <input type="text" id="adminUsername" required class="admin-input w-full bg-zinc-900 border border-zinc-700 rounded-sm px-4 py-3 text-white focus:outline-none transition-all" placeholder="admin_root">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-violet-400 mb-2 uppercase">Passcode</label>
+                <input type="password" id="adminPassword" required class="admin-input w-full bg-zinc-900 border border-zinc-700 rounded-sm px-4 py-3 text-white focus:outline-none transition-all" placeholder="••••••••">
+            </div>
+            <button type="submit" class="w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-4 rounded-sm transition-colors duration-300 uppercase tracking-widest mt-4">
+                GRANT ACCESS
+            </button>
+        </form>
+
+        <div class="mt-8 flex justify-between text-[10px] text-zinc-600">
+            <span>V.1.0.0.1</span>
+            <span>RESTRICTED AREA</span>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+
+            // Logika terhubung ke Dashboard Admin
+            if(username === 'admin' && password === 'admin123') {
+                window.location.href = 'dashboard-admin.html'; // LINK DIAKTIFKAN
+            } else {
+                alert('SECURITY ALERT: Otorisasi Ditolak! (Gunakan: admin / admin123)');
+            }
+        });
+    </script>
+</body>
+</html>

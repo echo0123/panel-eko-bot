@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard | Panel Eko</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(6, 182, 212, 0.2);
+            --accent-color: #06b6d4;
+            --text-main: #e2e8f0;
+            --bg-image: none;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            background-image: var(--bg-image);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background 0.3s ease;
+        }
+
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-btn.active {
+            background-color: rgba(6, 182, 212, 0.2);
+            border-left: 4px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .content-section { display: none; animation: fadeIn 0.3s; }
+        .content-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- SIDEBAR USER -->
+    <aside class="w-64 glass-card border-r border-slate-700 flex flex-col hidden md:flex">
+        <div class="p-6 border-b border-slate-700 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] bg-slate-900 flex-shrink-0">
+                <img src="https://drive.google.com/thumbnail?id=1ePYQh24_aN6_bSm0wjJh72LD6ccu6Ngo&sz=w500" alt="Logo" class="w-full h-full object-cover scale-150">
+            </div>
+            <div>
+                <h1 class="text-white font-bold tracking-widest text-lg">PANEL EKO</h1>
+                <p class="text-[10px] text-cyan-400 uppercase">User Portal</p>
+            </div>
+        </div>
+        
+        <nav class="flex-1 p-4 space-y-2">
+            <button onclick="switchTab('panel')" id="nav-panel" class="menu-btn active w-full text-left px-4 py-3 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition rounded">
+                Menu Panel
+            </button>
+            <button onclick="switchTab('tema')" id="nav-tema" class="menu-btn w-full text-left px-4 py-3 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition rounded">
+                Tema & Tampilan
+            </button>
+            <button onclick="switchTab('profil')" id="nav-profil" class="menu-btn w-full text-left px-4 py-3 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition rounded">
+                Profil Saya
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-slate-700">
+            <button onclick="logoutUser()" class="w-full px-4 py-2 bg-slate-800 hover:bg-red-900/40 text-slate-300 hover:text-red-400 border border-slate-700 transition rounded text-sm font-bold">
+                LOGOUT
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col overflow-hidden relative">
+        <header class="glass-card border-b border-slate-700 p-5 flex justify-between items-center z-10">
+            <h2 class="text-xl font-bold text-white tracking-wide" id="header-title">MENU PANEL</h2>
+            <div class="flex items-center gap-3">
+                <span class="text-sm text-slate-400">Halo, <span id="display-name-header" class="text-white font-semibold">User</span></span>
+                <img id="header-avatar" src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff" class="w-8 h-8 rounded-full border border-cyan-500">
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8 z-10">
+            
+            <!-- SECTION 1: MENU PANEL -->
+            <div id="section-panel" class="content-section active">
+                <div id="userMenuContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+
+            <!-- SECTION 2: TEMA & TAMPILAN -->
+            <div id="section-tema" class="content-section">
+                <div class="glass-card max-w-3xl mx-auto rounded-xl p-8 space-y-8">
+                    <h3 class="text-xl font-bold text-white border-b border-slate-700 pb-4">Pengaturan Tema Dashboard</h3>
+                    
+                    <div class="space-y-4">
+                        <h4 class="text-sm font-bold text-cyan-400 uppercase tracking-widest">Tema Bawaan (Gratis)</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <button onclick="terapkanTema('cyber')" class="p-4 bg-slate-800 hover:bg-slate-700 border border-cyan-500/50 rounded-lg text-xs font-bold text-cyan-300 transition text-center shadow">Cyber Cyan</button>
+                            <button onclick="terapkanTema('matrix')" class="p-4 bg-zinc-900 hover:bg-zinc-800 border border-emerald-500/50 rounded-lg text-xs font-bold text-emerald-400 transition text-center shadow">Emerald Matrix</button>
+                            <button onclick="terapkanTema('crimson')" class="p-4 bg-stone-900 hover:bg-stone-800 border border-rose-500/50 rounded-lg text-xs font-bold text-rose-400 transition text-center shadow">Crimson Core</button>
+                            <button onclick="terapkanTema('gold')" class="p-4 bg-neutral-900 hover:bg-neutral-800 border border-amber-500/50 rounded-lg text-xs font-bold text-amber-400 transition text-center shadow">Gold Elite</button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 pt-4 border-t border-slate-700">
+                        <h4 class="text-sm font-bold text-amber-400 uppercase tracking-widest">Custom UI & Galeri Wallpaper Kustom (Berbayar)</h4>
+                        <div id="customUiBox" class="p-5 bg-slate-900/60 rounded-lg border border-slate-700 text-xs text-slate-300 space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: PROFIL -->
+            <div id="section-profil" class="content-section">
+                <div class="glass-card max-w-xl mx-auto rounded-xl p-8 space-y-6">
+                    <h3 class="text-xl font-bold text-white border-b border-slate-700 pb-4">Profil Saya</h3>
+                    <div class="flex flex-col items-center space-y-4">
+                        <img id="preview-foto" src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff&size=150" alt="Foto" class="w-28 h-28 rounded-full object-cover border-4 border-slate-700">
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Nama Lengkap</label>
+                            <input type="text" id="input-nama-profil" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-4 py-2 text-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Email</label>
+                            <input type="email" id="input-email-profil" disabled class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-slate-500 text-sm cursor-not-allowed">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: WORKSPACE (DENGAN BOT AUTOMATION ENGINE) -->
+            <div id="section-workspace" class="content-section">
+                <button onclick="switchTab('panel')" class="mb-6 flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition text-sm font-semibold">
+                    ← KEMBALI KE MENU PANEL
+                </button>
+                
+                <!-- Container Workspace Default (untuk panel umum) -->
+                <div id="defaultWorkspaceContainer" class="glass-card rounded-lg p-8 flex flex-col items-center border border-cyan-500/30 min-h-[400px]">
+                    <h3 id="workspace-title" class="text-2xl font-black text-white tracking-widest mb-3 uppercase text-center">NAMA PANEL</h3>
+                    <p id="workspace-desc" class="text-sm text-slate-400 text-center max-w-xl mb-6">Deskripsi</p>
+                    <div class="w-full bg-slate-900/50 border border-dashed border-slate-700 rounded-lg p-8 text-center text-slate-500 text-sm">
+                        Area kerja modul aktif.
+                    </div>
+                </div>
+
+                <!-- Container Bot Automation Engine (KHUSUS PANEL "daftar") -->
+                <div id="botControlContainer" class="glass-card rounded-lg p-8 space-y-6 border border-cyan-500/30" style="display: none;">
+                    <div class="flex items-center justify-between border-b border-slate-700 pb-4">
+                        <div>
+                            <h3 id="bot-workspace-title" class="text-xl font-black text-white tracking-widest uppercase">DAFTAR</h3>
+                            <p class="text-xs text-slate-400 mt-1">untuk melakukan pendaftaran otomatis menggunakan bot</p>
+                        </div>
+                        <span class="px-3 py-1 bg-cyan-900/40 border border-cyan-700/50 text-cyan-300 text-xs font-bold rounded-full">Bot Automation Engine</span>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-cyan-400 mb-1">Pilih Target Platform (List Link)</label>
+                                <select id="botTargetPlatform" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
+                                    <option value="https://mez.ink/">https://mez.ink/ (Aktif)</option>
+                                    <option value="https://joy.bio/">https://joy.bio/ (Antrean)</option>
+                                    <option value="https://www.linkbio.website/">https://www.linkbio.website/ (Antrean)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-cyan-400 mb-1">Nama Akun</label>
+                                <input type="text" id="botAccountName" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-white focus:outline-none focus:border-cyan-500" placeholder="Cth: Eko Store">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-cyan-400 mb-1">Email Registrasi</label>
+                                <input type="email" id="botEmail" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-white focus:outline-none focus:border-cyan-500" placeholder="user@eko.com">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-cyan-400 mb-1">Password Akun</label>
+                                <input type="password" id="botPassword" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-white focus:outline-none focus:border-cyan-500" placeholder="••••••••">
+                            </div>
+                            <div class="flex items-end">
+                                <div class="w-full p-3 bg-slate-900/60 border border-slate-700 rounded flex justify-between items-center">
+                                    <span class="text-xs text-slate-400">Total Tautan Bio Link: <b id="counterTautan" class="text-emerald-400">1</b></span>
+                                    <button type="button" onclick="tambahBarisTautan()" class="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs font-bold transition">+ Tambah Tautan</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CONTAINER MULTIPLE TAUTAN -->
+                        <div class="space-y-3">
+                            <label class="block text-xs font-bold text-cyan-400 uppercase tracking-widest">Daftar Title & URL Bio Link (Multiple Payload)</label>
+                            <div id="tautanContainer" class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                                <div class="flex gap-2 items-center tautan-row bg-slate-900/40 p-2 rounded border border-slate-800">
+                                    <input type="text" placeholder="Title (Cth: Official WhatsApp)" class="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-cyan-500 tautan-title">
+                                    <input type="text" placeholder="URL (Cth: https://wa.me/...)" class="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-cyan-500 tautan-url">
+                                    <button type="button" onclick="hapusBarisTautan(this)" class="px-2.5 py-2 bg-rose-900/30 hover:bg-rose-700 text-rose-300 rounded text-xs transition border border-rose-800 font-bold">Hapus</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4 pt-2">
+                            <button onclick="simpanDataBotUser()" class="px-5 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded text-sm transition shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                                💾 SIMPAN DATA BOT
+                            </button>
+                            <button onclick="jalankanBotDaftarUser()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded text-sm transition shadow-[0_0_15px_rgba(16,185,129,0.3)] flex items-center gap-2">
+                                🚀 JALANKAN BOT OTOMATIS
+                            </button>
+                            <button onclick="resetFormBotUser()" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-sm transition">Reset Form</button>
+                        </div>
+
+                        <!-- TERMINAL KONSOL -->
+                        <div class="mt-6">
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Terminal Log Aktivitas Bot (Termux Console)</label>
+                            <div id="botConsoleLog" class="w-full h-48 bg-black/80 border border-slate-800 rounded p-4 font-mono text-xs text-emerald-400 overflow-y-auto space-y-1">
+                                <p class="text-slate-500">[System] Bot automation engine siap. Silakan masukkan data tautan Anda.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        window.onload = function() {
+            let currentUser = JSON.parse(localStorage.getItem('current_user'));
+            if(!currentUser) { window.location.href = 'login-user.html'; return; }
+
+            let users = JSON.parse(localStorage.getItem('db_users')) || [];
+            let freshUser = users.find(u => u.email === currentUser.email) || currentUser;
+
+            document.getElementById('display-name-header').innerText = freshUser.name;
+            document.getElementById('input-nama-profil').value = freshUser.name;
+            document.getElementById('input-email-profil').value = freshUser.email;
+            
+            let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(freshUser.name)}&background=06b6d4&color=fff`;
+            document.getElementById('header-avatar').src = avatarUrl;
+            document.getElementById('preview-foto').src = avatarUrl + "&size=150";
+
+            muatMenuUser(freshUser.email);
+            muatStatusCustomUi(freshUser);
+            muatTemaTersimpan(freshUser.email);
+        }
+
+        function muatMenuUser(userEmail) {
+            let menus = JSON.parse(localStorage.getItem('db_menus')) || [];
+            let container = document.getElementById('userMenuContainer');
+            container.innerHTML = '';
+
+            let allowedMenus = menus.filter(menu => menu.allowedUsers.includes(userEmail));
+            allowedMenus.sort((a, b) => a.name.localeCompare(b.name, undefined, {sensitivity: 'base'}));
+
+            if(allowedMenus.length === 0) {
+                container.innerHTML = `<div class="col-span-full p-8 text-center glass-card rounded-xl text-slate-400">Belum ada modul panel yang diizinkan untuk akun Anda. Silakan hubungi Administrator.</div>`;
+                return;
+            }
+
+            allowedMenus.forEach(menu => {
+                let card = document.createElement('div');
+                card.className = "glass-card p-6 rounded-xl hover:border-cyan-500 transition group cursor-pointer flex flex-col";
+                card.innerHTML = `
+                    <div class="w-12 h-12 bg-cyan-900/50 rounded-lg flex items-center justify-center mb-4 text-cyan-400">⚡</div>
+                    <h3 class="text-lg font-bold text-white mb-2">${menu.name}</h3>
+                    <div class="text-sm text-slate-400 flex-1">${menu.desc}</div>
+                `;
+                card.onclick = () => bukaWorkspacePanelUser(menu.name, menu.desc);
+                container.appendChild(card);
+            });
+        }
+
+        // FUNGSI MULTIPLE TAUTAN DI USER
+        function tambahBarisTautan(titleVal = '', urlVal = '') {
+            let container = document.getElementById('tautanContainer');
+            let row = document.createElement('div');
+            row.className = "flex gap-2 items-center tautan-row bg-slate-900/40 p-2 rounded border border-slate-800";
+            row.innerHTML = `
+                <input type="text" placeholder="Title (Cth: Official WhatsApp)" value="${titleVal}" class="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-cyan-500 tautan-title">
+                <input type="text" placeholder="URL (Cth: https://wa.me/...)" value="${urlVal}" class="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-cyan-500 tautan-url">
+                <button type="button" onclick="hapusBarisTautan(this)" class="px-2.5 py-2 bg-rose-900/30 hover:bg-rose-700 text-rose-300 rounded text-xs transition border border-rose-800 font-bold">Hapus</button>
+            `;
+            container.appendChild(row);
+            updateCounterTautan();
+        }
+
+        function hapusBarisTautan(btn) {
+            let rows = document.querySelectorAll('.tautan-row');
+            if(rows.length > 1) {
+                btn.closest('.tautan-row').remove();
+                updateCounterTautan();
+            } else {
+                alert('Minimal harus menyisakan 1 baris tautan.');
+            }
+        }
+
+        function updateCounterTautan() {
+            let count = document.querySelectorAll('.tautan-row').length;
+            document.getElementById('counterTautan').innerText = count;
+        }
+
+        function simpanDataBotUser() {
+            let currentUser = JSON.parse(localStorage.getItem('current_user'));
+            let platform = document.getElementById('botTargetPlatform').value;
+            let akun = document.getElementById('botAccountName').value;
+            let email = document.getElementById('botEmail').value;
+            let pass = document.getElementById('botPassword').value;
+            
+            let tautanList = [];
+            document.querySelectorAll('.tautan-row').forEach(row => {
+                let t = row.querySelector('.tautan-title').value;
+                let u = row.querySelector('.tautan-url').value;
+                if(t || u) tautanList.push({ title: t, url: u });
+            });
+
+            let config = { platform, akun, email, pass, tautanList };
+            localStorage.setItem('bot_config_' + currentUser.email, JSON.stringify(config));
+            alert('Konfigurasi Bot & Daftar Tautan Berhasil Disimpan di Akun Anda!');
+        }
+
+        function muatKonfigurasiBotUser(email) {
+            let saved = localStorage.getItem('bot_config_' + email);
+            if(saved) {
+                let config = JSON.parse(saved);
+                document.getElementById('botTargetPlatform').value = config.platform || 'https://mez.ink/';
+                document.getElementById('botAccountName').value = config.akun || '';
+                document.getElementById('botEmail').value = config.email || '';
+                document.getElementById('botPassword').value = config.pass || '';
+
+                if(config.tautanList && config.tautanList.length > 0) {
+                    let container = document.getElementById('tautanContainer');
+                    container.innerHTML = '';
+                    config.tautanList.forEach(item => {
+                        tambahBarisTautan(item.title, item.url);
+                    });
+                }
+            }
+        }
+
+        function jalankanBotDaftarUser() {
+            let platform = document.getElementById('botTargetPlatform').value;
+            let akun = document.getElementById('botAccountName').value;
+            let email = document.getElementById('botEmail').value;
+            let consoleLog = document.getElementById('botConsoleLog');
+
+            let tautanList = [];
+            document.querySelectorAll('.tautan-row').forEach(row => {
+                let t = row.querySelector('.tautan-title').value;
+                let u = row.querySelector('.tautan-url').value;
+                if(t && u) tautanList.push({ title: t, url: u });
+            });
+
+            if(!akun || !email || tautanList.length === 0) {
+                alert('Harap lengkapi nama akun, email, dan minimal 1 pasang Title & URL yang valid!');
+                return;
+            }
+
+            consoleLog.innerHTML += `<p class="text-cyan-400">[Bot] Memulai otomatisasi pendaftaran di: ${platform}</p>`;
+            consoleLog.innerHTML += `<p class="text-slate-300">[Data] Akun: ${akun} | Total Tautan: ${tautanList.length} link</p>`;
+            
+            tautanList.forEach((item, idx) => {
+                consoleLog.innerHTML += `<p class="text-slate-400 ml-4"> -> [Link #${idx+1}] Title: "${item.title}" | URL: ${item.url}</p>`;
+            });
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+
+            setTimeout(() => {
+                consoleLog.innerHTML += `<p class="text-yellow-400">[Network] Mengirimkan data registrasi ke server ${platform}...</p>`;
+                consoleLog.scrollTop = consoleLog.scrollHeight;
+            }, 1200);
+
+            setTimeout(() => {
+                consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success] Pendaftaran BERHASIL! ${tautanList.length} tautan bio link telah di-publish otomatis.</p>`;
+                consoleLog.scrollTop = consoleLog.scrollHeight;
+            }, 3000);
+        }
+
+        function resetFormBotUser() {
+            document.getElementById('botAccountName').value = '';
+            document.getElementById('botEmail').value = '';
+            document.getElementById('botPassword').value = '';
+            document.getElementById('tautanContainer').innerHTML = `
+                <div class="flex gap-2 items-center tautan-row bg-slate-900/40 p-2 rounded border border-slate-800">
+                    <input type="text" placeholder="Title (Cth: Official WhatsApp)" class="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-cyan-500 tautan-title">
+                    <input type="text" placeholder="URL (Cth: https://wa.me/...)" class="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-cyan-500 tautan-url">
+                    <button type="button" onclick="hapusBarisTautan(this)" class="px-2.5 py-2 bg-rose-900/30 hover:bg-rose-700 text-rose-300 rounded text-xs transition border border-rose-800 font-bold">Hapus</button>
+                </div>
+            `;
+            updateCounterTautan();
+            let currentUser = JSON.parse(localStorage.getItem('current_user'));
+            localStorage.removeItem('bot_config_' + currentUser.email);
+            document.getElementById('botConsoleLog').innerHTML = `<p class="text-slate-500">[System] Form dibersihkan.</p>`;
+        }
+
+        function muatStatusCustomUi(user) {
+            let box = document.getElementById('customUiBox');
+            let sekarang = new Date().getTime();
+
+            if(user.customUiAllowed && user.customUiExpiry && sekarang < user.customUiExpiry) {
+                let tglExp = new Date(user.customUiExpiry).toLocaleDateString('id-ID', {dateStyle: 'long'});
+                let currentUser = JSON.parse(localStorage.getItem('current_user'));
+                let galleryKey = 'gallery_' + currentUser.email;
+                let gallery = JSON.parse(localStorage.getItem(galleryKey)) || [];
+
+                let galleryHtml = '';
+                if(gallery.length > 0) {
+                    galleryHtml = `<div class="grid grid-cols-3 md:grid-cols-4 gap-3 mt-3">`;
+                    gallery.forEach((imgSrc, index) => {
+                        galleryHtml += `
+                            <div class="relative group border border-slate-700 rounded-lg overflow-hidden h-20 bg-slate-900">
+                                <img src="${imgSrc}" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition" onclick="pakaiWallpaperGaleri('${imgSrc}')" title="Klik untuk pasang wallpaper">
+                                <button onclick="hapusWallpaperGaleri(${index})" class="absolute top-1 right-1 bg-rose-600 hover:bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded shadow opacity-0 group-hover:opacity-100 transition">Hapus</button>
+                            </div>
+                        `;
+                    });
+                    galleryHtml += `</div>`;
+                } else {
+                    galleryHtml = `<p class="text-xs text-slate-500 italic mt-2">Belum ada wallpaper tersimpan di galeri akun Anda.</p>`;
+                }
+
+                box.innerHTML = `
+                    <p class="text-emerald-400 font-bold mb-1">Status Langganan: AKTIF (${user.jenisLayananAktif || 'Custom UI Wallpaper'})</p>
+                    <p class="text-slate-300 mb-3">Masa Aktif Berlangganan: <b class="text-white">${tglExp}</b></p>
+                    
+                    <div class="space-y-3 pt-2 border-t border-slate-800">
+                        <label class="block text-xs font-bold text-amber-400">Unggah Wallpaper Baru ke Galeri Akun:</label>
+                        <input type="file" id="uploadWallpaper" accept="image/*" onchange="tambahWallpaperKeGaleri(event)" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-xs text-white file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-500 cursor-pointer">
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-800">
+                        <label class="block text-xs font-bold text-cyan-400 mb-1">Galeri Wallpaper Tersimpan (Klik untuk Pakai):</label>
+                        ${galleryHtml}
+                    </div>
+
+                    <div class="pt-3">
+                        <button onclick="resetWallpaper()" class="px-3 py-1.5 bg-rose-900/40 hover:bg-rose-700 text-rose-300 rounded text-xs transition border border-rose-800 font-bold">Reset ke Tema Default</button>
+                    </div>
+                `;
+            } else {
+                box.innerHTML = `
+                    <p class="text-rose-400 font-bold mb-1">Status: TERKUNCI / BELUM BERLANGGANAN</p>
+                    <p class="text-slate-400">Fitur galeri wallpaper kustom memerlukan aktivasi layanan berbayar dari Admin.</p>
+                `;
+            }
+        }
+
+        function terapkanTema(namaTema) {
+            let root = document.documentElement;
+            root.style.setProperty('--bg-image', 'none');
+            if(namaTema === 'cyber') { root.style.setProperty('--bg-main', '#0f172a'); root.style.setProperty('--accent-color', '#06b6d4'); root.style.setProperty('--border-color', 'rgba(6, 182, 212, 0.2)'); }
+            else if(namaTema === 'matrix') { root.style.setProperty('--bg-main', '#022c22'); root.style.setProperty('--accent-color', '#10b981'); root.style.setProperty('--border-color', 'rgba(16, 185, 129, 0.2)'); }
+            else if(namaTema === 'crimson') { root.style.setProperty('--bg-main', '#450a0a'); root.style.setProperty('--accent-color', '#f43f5e'); root.style.setProperty('--border-color', 'rgba(244, 63, 94, 0.2)'); }
+            else if(namaTema === 'gold') { root.style.setProperty('--bg-main', '#451a03'); root.style.setProperty('--accent-color', '#fbbf24'); root.style.setProperty('--border-color', 'rgba(251, 191, 36, 0.2)'); }
+            
+            let currentUser = JSON.parse(localStorage.getItem('current_user'));
+            localStorage.setItem('theme_' + currentUser.email, namaTema);
+            localStorage.removeItem('active_wallpaper_' + currentUser.email);
+        }
+
+        function tambahWallpaperKeGaleri(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    let base64Image = e.target.result;
+                    let currentUser = JSON.parse(localStorage.getItem('current_user'));
+                    let galleryKey = 'gallery_' + currentUser.email;
+                    
+                    let gallery = JSON.parse(localStorage.getItem(galleryKey)) || [];
+                    gallery.unshift(base64Image);
+                    localStorage.setItem(galleryKey, JSON.stringify(gallery));
+
+                    pakaiWallpaperGaleri(base64Image);
+
+                    let users = JSON.parse(localStorage.getItem('db_users')) || [];
+                    let freshUser = users.find(u => u.email === currentUser.email) || currentUser;
+                    muatStatusCustomUi(freshUser);
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function pakaiWallpaperGaleri(imgSrc) {
+            document.documentElement.style.setProperty('--bg-image', `url('${imgSrc}')`);
+            let currentUser = JSON.parse(localStorage.getItem('current_user'));
+            localStorage.setItem('active_wallpaper_' + currentUser.email, imgSrc);
+            alert('Wallpaper berhasil dipasang!');
+        }
+
+        function hapusWallpaperGaleri(index) {
+            if(confirm('Hapus wallpaper ini dari galeri penyimpanan akun Anda?')) {
+                let currentUser = JSON.parse(localStorage.getItem('current_user'));
+                let galleryKey = 'gallery_' + currentUser.email;
+                let gallery = JSON.parse(localStorage.getItem(galleryKey)) || [];
+                
+                gallery.splice(index, 1);
+                localStorage.setItem(galleryKey, JSON.stringify(gallery));
+
+                let users = JSON.parse(localStorage.getItem('db_users')) || [];
+                let freshUser = users.find(u => u.email === currentUser.email) || currentUser;
+                muatStatusCustomUi(freshUser);
+            }
+        }
+
+        function resetWallpaper() {
+            let currentUser = JSON.parse(localStorage.getItem('current_user'));
+            localStorage.removeItem('active_wallpaper_' + currentUser.email);
+            terapkanTema('cyber');
+            alert('Tema dikembalikan ke default.');
+        }
+
+        function muatTemaTersimpan(email) {
+            let activeWp = localStorage.getItem('active_wallpaper_' + email);
+            if(activeWp) {
+                document.documentElement.style.setProperty('--bg-image', `url('${activeWp}')`);
+            } else {
+                let savedTheme = localStorage.getItem('theme_' + email);
+                if(savedTheme) terapkanTema(savedTheme);
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            if(document.getElementById('nav-' + tabId)) document.getElementById('nav-' + tabId).classList.add('active');
+            document.getElementById('section-' + tabId).classList.add('active');
+            
+            let titles = { panel: 'MENU PANEL', tema: 'TEMA & TAMPILAN', profil: 'PROFIL SAYA' };
+            document.getElementById('header-title').innerText = titles[tabId] || 'PANEL EKO';
+        }
+
+        function bukaWorkspacePanelUser(name, desc) {
+            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById('nav-panel').classList.add('active');
+            document.getElementById('section-workspace').classList.add('active');
+            document.getElementById('header-title').innerText = 'WORKSPACE: ' + name.toUpperCase();
+
+            // Jika panel yang diklik adalah "daftar", tampilkan Bot Automation Engine
+            if(name.toLowerCase() === 'daftar') {
+                document.getElementById('defaultWorkspaceContainer').style.display = 'none';
+                document.getElementById('botControlContainer').style.display = 'block';
+                let currentUser = JSON.parse(localStorage.getItem('current_user'));
+                muatKonfigurasiBotUser(currentUser.email);
+            } else {
+                document.getElementById('defaultWorkspaceContainer').style.display = 'block';
+                document.getElementById('botControlContainer').style.display = 'none';
+                document.getElementById('workspace-title').innerText = name.toUpperCase();
+                document.getElementById('workspace-desc').innerText = desc;
+            }
+        }
+
+        function logoutUser() {
+            if(confirm('Keluar dari Panel Eko?')) {
+                localStorage.removeItem('current_user');
+                window.location.href = 'login-user.html';
+            }
+        }
+    </script>
+</body>
+</html>

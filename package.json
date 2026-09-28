@@ -1,0 +1,11 @@
+{
+  "name": "bot-mezink-auto",
+  "version": "1.0.0",
+  "description": "Bot pendaftaran otomatis Mez.ink dengan Puppeteer",
+  "main": "bot.js",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "puppeteer": "^22.15.0"
+  }
+}

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard | Panel Eko</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .menu-btn.active {
+            background-color: rgba(6, 182, 212, 0.2);
+            border-left: 4px solid #06b6d4;
+            color: #22d3ee;
+        }
+        .content-section {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        .content-section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- SIDEBAR USER -->
+    <aside class="w-64 glass-card border-r border-slate-700 flex flex-col hidden md:flex">
+        <div class="p-6 border-b border-slate-700 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] bg-slate-900 flex-shrink-0">
+                <img src="https://drive.google.com/thumbnail?id=1ePYQh24_aN6_bSm0wjJh72LD6ccu6Ngo&sz=w500" alt="Logo Panel Eko" class="w-full h-full object-cover scale-150">
+            </div>
+            <div>
+                <h1 class="text-white font-bold tracking-widest text-lg">PANEL EKO</h1>
+                <p class="text-[10px] text-cyan-400 uppercase">User Portal</p>
+            </div>
+        </div>
+        
+        <nav class="flex-1 p-4 space-y-2">
+            <button onclick="switchTab('panel')" id="nav-panel" class="menu-btn active w-full text-left px-4 py-3 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition rounded">
+                Menu Panel
+            </button>
+            <button onclick="switchTab('profil')" id="nav-profil" class="menu-btn w-full text-left px-4 py-3 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition rounded">
+                Profil Saya
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-slate-700">
+            <button onclick="logoutUser()" class="w-full px-4 py-2 bg-slate-800 hover:bg-red-900/40 text-slate-300 hover:text-red-400 border border-slate-700 hover:border-red-800 transition rounded text-sm font-bold">
+                LOGOUT
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col overflow-hidden relative">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-cyan-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-10 pointer-events-none"></div>
+
+        <header class="glass-card border-b border-slate-700 p-5 flex justify-between items-center z-10">
+            <h2 class="text-xl font-bold text-white tracking-wide" id="header-title">MENU PANEL</h2>
+            <div class="flex items-center gap-3">
+                <span class="text-sm text-slate-400">Halo, <span id="display-name-header" class="text-white font-semibold">User</span></span>
+                <img id="header-avatar" src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff" class="w-8 h-8 rounded-full border border-cyan-500">
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8 z-10">
+            
+            <!-- ========================================== -->
+            <!-- SECTION 1: MENU PANEL (DINAMIS DARI DATABASE) -->
+            <!-- ========================================== -->
+            <div id="section-panel" class="content-section active">
+                <div id="userMenuContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Menu akan di-generate otomatis oleh JS di sini -->
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SECTION 2: PROFIL -->
+            <!-- ========================================== -->
+            <div id="section-profil" class="content-section">
+                <div class="glass-card max-w-2xl mx-auto rounded-xl p-8">
+                    <h3 class="text-xl font-bold text-white mb-6 border-b border-slate-700 pb-4">Pengaturan Profil</h3>
+                    
+                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                        <div class="flex flex-col items-center space-y-4">
+                            <div class="relative group">
+                                <img id="preview-foto" src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff&size=150" alt="Foto Profil" class="w-32 h-32 rounded-full object-cover border-4 border-slate-700 group-hover:border-cyan-500 transition">
+                                <label for="upload-foto" class="absolute inset-0 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition">
+                                    Ubah Foto
+                                </label>
+                                <input type="file" id="upload-foto" class="hidden" accept="image/*" onchange="previewImage(event)">
+                            </div>
+                            <p class="text-xs text-slate-500">Format: JPG, PNG. Max: 2MB.</p>
+                        </div>
+
+                        <div class="flex-1 space-y-5 w-full">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-1">Nama Lengkap</label>
+                                <input type="text" id="input-nama-profil" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-1">Email (Hanya Baca)</label>
+                                <input type="email" id="input-email-profil" disabled class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-500 cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-1">Ubah Password Baru</label>
+                                <input type="password" placeholder="Kosongkan jika tidak ingin mengubah" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 transition">
+                            </div>
+                            
+                            <button class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2.5 px-6 rounded-lg transition-colors shadow-[0_0_10px_rgba(6,182,212,0.3)] mt-2">
+                                Simpan Perubahan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SECTION 3: WORKSPACE PANEL AKTIF -->
+            <!-- ========================================== -->
+            <div id="section-workspace" class="content-section">
+                <button onclick="switchTab('panel')" class="mb-6 flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition text-sm font-semibold">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    KEMBALI KE MENU PANEL
+                </button>
+                
+                <div class="glass-card rounded-lg p-8 flex flex-col items-center border border-cyan-500/30 min-h-[500px]">
+                    <div class="w-20 h-20 bg-cyan-900/30 rounded-full flex items-center justify-center mb-6 text-cyan-400 border border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.2)]">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    
+                    <h3 id="workspace-title" class="text-2xl font-black text-white tracking-widest mb-3 uppercase text-center">NAMA PANEL</h3>
+                    <p id="workspace-desc" class="text-sm text-slate-400 text-center max-w-xl">
+                        Deskripsi panel akan muncul di sini.
+                    </p>
+
+                    <div class="mt-10 w-full bg-slate-900/50 border border-dashed border-slate-700 rounded-lg p-10 flex items-center justify-center">
+                        <p class="text-slate-500 text-sm font-mono flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                            AREA KERJA USER UNTUK PANEL INI
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        window.onload = function() {
+            let currentUser = JSON.parse(localStorage.getItem('current_user'));
+            
+            if(!currentUser) {
+                window.location.href = 'login-user.html';
+                return;
+            }
+
+            document.getElementById('display-name-header').innerText = currentUser.name;
+            document.getElementById('input-nama-profil').value = currentUser.name;
+            document.getElementById('input-email-profil').value = currentUser.email;
+            
+            let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=06b6d4&color=fff`;
+            document.getElementById('header-avatar').src = avatarUrl;
+            document.getElementById('preview-foto').src = avatarUrl + "&size=150";
+
+            muatMenuUser(currentUser.email);
+        }
+
+        // ==========================================
+        // FUNGSI MEMUAT MENU DAN DESKRIPSI DINAMIS
+        // ==========================================
+        function muatMenuUser(userEmail) {
+            let menus = JSON.parse(localStorage.getItem('db_menus')) || [];
+            let container = document.getElementById('userMenuContainer');
+            container.innerHTML = '';
+
+            // Filter menu sesuai hak akses
+            let allowedMenus = menus.filter(menu => {
+                return menu.allowedUsers.includes('all') || menu.allowedUsers.includes(userEmail);
+            });
+            
+            // Urutkan Abjad
+            allowedMenus.sort((a, b) => a.name.localeCompare(b.name, undefined, {sensitivity: 'base'}));
+
+            if(allowedMenus.length === 0) {
+                container.innerHTML = `<div class="col-span-full p-8 text-center glass-card rounded-xl text-slate-400">Belum ada menu panel yang diizinkan untuk akun Anda. Hubungi Administrator.</div>`;
+                return;
+            }
+
+            allowedMenus.forEach(menu => {
+                let card = document.createElement('div');
+                card.className = "glass-card p-6 rounded-xl hover:border-cyan-500 transition group cursor-pointer flex flex-col";
+                
+                // HTML Card Menu dengan Deskripsi yang ditarik dari Database Admin
+                card.innerHTML = `
+                    <div class="w-12 h-12 bg-cyan-900/50 rounded-lg flex items-center justify-center mb-4 text-cyan-400 group-hover:bg-cyan-500 group-hover:text-white transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">${menu.name}</h3>
+                    <div class="text-sm text-slate-400 flex-1">${menu.desc}</div>
+                `;
+                
+                // Aksi saat user mengklik menu panel
+                card.onclick = function() {
+                    bukaWorkspacePanelUser(menu.name, menu.desc);
+                };
+
+                container.appendChild(card);
+            });
+        }
+
+        // ==========================================
+        // NAVIGASI
+        // ==========================================
+        function switchTab(tabId) {
+            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+
+            if(document.getElementById('nav-' + tabId)) {
+                document.getElementById('nav-' + tabId).classList.add('active');
+            }
+            
+            document.getElementById('section-' + tabId).classList.add('active');
+            
+            let title = 'MENU PANEL';
+            if(tabId === 'profil') title = 'PROFIL SAYA';
+            document.getElementById('header-title').innerText = title;
+        }
+
+        function bukaWorkspacePanelUser(name, desc) {
+            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+
+            document.getElementById('nav-panel').classList.add('active'); // Tetap sorot sidebar menu panel
+            document.getElementById('section-workspace').classList.add('active');
+            
+            document.getElementById('header-title').innerText = 'WORKSPACE: ' + name.toUpperCase();
+            document.getElementById('workspace-title').innerText = name.toUpperCase();
+            document.getElementById('workspace-desc').innerText = desc;
+        }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('preview-foto').src = e.target.result;
+                    document.getElementById('header-avatar').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function logoutUser() {
+            if(confirm('Apakah Anda yakin ingin keluar dari Panel Eko?')) {
+                localStorage.removeItem('current_user'); 
+                window.location.href = 'login-user.html'; 
+            }
+        }
+    </script>
+</body>
+</html>
