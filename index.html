@@ -5,12 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard | Panel Eko</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- KEAMANAN INSTAN: CEK SESI SEBELUM HALAMAN DIRENDER -->
+    <script>
+        (function() {
+            let currentUser = JSON.parse(localStorage.getItem('current_user'));
+            let users = JSON.parse(localStorage.getItem('db_users')) || [];
+
+            if (!currentUser || !currentUser.email) {
+                localStorage.removeItem('current_user');
+                window.location.replace('login-user.html');
+                return;
+            }
+
+            let latestUser = users.find(u => u.email.toLowerCase() === currentUser.email.toLowerCase() && u.status === 'active');
+            if (!latestUser) {
+                localStorage.removeItem('current_user');
+                window.location.replace('login-user.html');
+                return;
+            }
+
+            localStorage.setItem('current_user', JSON.stringify(latestUser));
+        })();
+    </script>
+
     <style>
+        :root {
+            --bg-main: #0f172a;
+            --bg-image: none;
+        }
+
         body {
-            background-color: #0f172a;
+            background-color: var(--bg-main);
+            background-image: var(--bg-image);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             color: #e2e8f0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background 0.3s ease;
         }
+
         .glass-card {
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(12px);
@@ -56,9 +91,16 @@
             <button onclick="switchTab('profil')" id="nav-profil" class="menu-btn w-full text-left px-4 py-3 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition rounded">
                 Profil Saya
             </button>
+            <button onclick="switchTab('tema')" id="nav-tema" class="menu-btn w-full text-left px-4 py-3 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition rounded">
+                Tema & Wallpaper
+            </button>
         </nav>
 
         <div class="p-4 border-t border-slate-700">
+            <div id="subscription-badge" class="mb-3 p-2.5 bg-slate-900/60 rounded-lg border border-slate-700 text-xs text-center">
+                <span class="text-slate-400 block">Status Layanan:</span>
+                <span id="sub-status-text" class="font-bold text-slate-300">Free Account</span>
+            </div>
             <button onclick="logoutUser()" class="w-full px-4 py-2 bg-slate-800 hover:bg-red-900/40 text-slate-300 hover:text-red-400 border border-slate-700 hover:border-red-800 transition rounded text-sm font-bold">
                 LOGOUT
             </button>
@@ -73,24 +115,18 @@
             <h2 class="text-xl font-bold text-white tracking-wide" id="header-title">MENU PANEL</h2>
             <div class="flex items-center gap-3">
                 <span class="text-sm text-slate-400">Halo, <span id="display-name-header" class="text-white font-semibold">User</span></span>
-                <img id="header-avatar" src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff" class="w-8 h-8 rounded-full border border-cyan-500">
+                <img id="header-avatar" src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff" class="w-8 h-8 rounded-full border border-cyan-500 object-cover">
             </div>
         </header>
 
         <div class="flex-1 overflow-y-auto p-8 z-10">
             
-            <!-- ========================================== -->
-            <!-- SECTION 1: MENU PANEL (DINAMIS DARI DATABASE) -->
-            <!-- ========================================== -->
+            <!-- SECTION 1: MENU PANEL -->
             <div id="section-panel" class="content-section active">
-                <div id="userMenuContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Menu akan di-generate otomatis oleh JS di sini -->
-                </div>
+                <div id="userMenuContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
 
-            <!-- ========================================== -->
             <!-- SECTION 2: PROFIL -->
-            <!-- ========================================== -->
             <div id="section-profil" class="content-section">
                 <div class="glass-card max-w-2xl mx-auto rounded-xl p-8">
                     <h3 class="text-xl font-bold text-white mb-6 border-b border-slate-700 pb-4">Pengaturan Profil</h3>
@@ -99,7 +135,7 @@
                         <div class="flex flex-col items-center space-y-4">
                             <div class="relative group">
                                 <img id="preview-foto" src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff&size=150" alt="Foto Profil" class="w-32 h-32 rounded-full object-cover border-4 border-slate-700 group-hover:border-cyan-500 transition">
-                                <label for="upload-foto" class="absolute inset-0 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition">
+                                <label for="upload-foto" class="absolute inset-0 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition text-xs font-bold">
                                     Ubah Foto
                                 </label>
                                 <input type="file" id="upload-foto" class="hidden" accept="image/*" onchange="previewImage(event)">
@@ -118,10 +154,10 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-400 mb-1">Ubah Password Baru</label>
-                                <input type="password" placeholder="Kosongkan jika tidak ingin mengubah" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 transition">
+                                <input type="password" id="input-password-profil" placeholder="Kosongkan jika tidak ingin mengubah" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 transition">
                             </div>
                             
-                            <button class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2.5 px-6 rounded-lg transition-colors shadow-[0_0_10px_rgba(6,182,212,0.3)] mt-2">
+                            <button onclick="simpanProfilUser()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2.5 px-6 rounded-lg transition-colors shadow-[0_0_10px_rgba(6,182,212,0.3)] mt-2">
                                 Simpan Perubahan
                             </button>
                         </div>
@@ -129,33 +165,48 @@
                 </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- SECTION 3: WORKSPACE PANEL AKTIF -->
-            <!-- ========================================== -->
+            <!-- SECTION 3: TEMA & WALLPAPER USER (TERPROTEKSI BERDASARKAN IZIN ADMIN) -->
+            <div id="section-tema" class="content-section">
+                <div class="glass-card max-w-3xl mx-auto rounded-xl p-8 space-y-8">
+                    <h3 class="text-xl font-bold text-white border-b border-slate-700 pb-4">Pengaturan Tampilan Dashboard</h3>
+                    
+                    <div class="space-y-4">
+                        <h4 class="text-sm font-bold text-cyan-400 uppercase tracking-widest">Tema Bawaan (Free)</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <button onclick="terapkanTemaUser('cyber')" class="p-4 bg-slate-900 hover:bg-slate-800 border border-cyan-500/50 rounded-lg text-xs font-bold text-cyan-300 transition text-center shadow">Cyber Cyan</button>
+                            <button onclick="terapkanTemaUser('matrix')" class="p-4 bg-slate-900 hover:bg-slate-800 border border-emerald-500/50 rounded-lg text-xs font-bold text-emerald-400 transition text-center shadow">Emerald Matrix</button>
+                            <button onclick="terapkanTemaUser('crimson')" class="p-4 bg-slate-900 hover:bg-slate-800 border border-rose-500/50 rounded-lg text-xs font-bold text-rose-400 transition text-center shadow">Crimson Core</button>
+                            <button onclick="terapkanTemaUser('gold')" class="p-4 bg-slate-900 hover:bg-slate-800 border border-amber-500/50 rounded-lg text-xs font-bold text-amber-400 transition text-center shadow">Gold Elite</button>
+                        </div>
+                    </div>
+
+                    <!-- BAGIAN GALERI WALLPAPER KUSTOM (DIKUNCI JIKA ADMIN BELUM MEMBERI AKSES BERBAYAR) -->
+                    <div class="space-y-4 pt-4 border-t border-slate-700">
+                        <h4 class="text-sm font-bold text-cyan-400 uppercase tracking-widest">Galeri Wallpaper Kustom</h4>
+                        <div id="customWallpaperWrapper">
+                            <!-- Konten akan dirender dinamis via JS berdasarkan izin admin -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: WORKSPACE DINAMIS -->
             <div id="section-workspace" class="content-section">
                 <button onclick="switchTab('panel')" class="mb-6 flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition text-sm font-semibold">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     KEMBALI KE MENU PANEL
                 </button>
                 
-                <div class="glass-card rounded-lg p-8 flex flex-col items-center border border-cyan-500/30 min-h-[500px]">
-                    <div class="w-20 h-20 bg-cyan-900/30 rounded-full flex items-center justify-center mb-6 text-cyan-400 border border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.2)]">
-                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
+                <div class="glass-card rounded-lg p-8 space-y-6 border border-cyan-500/30">
+                    <div class="flex items-center justify-between border-b border-slate-700 pb-4">
+                        <div>
+                            <h3 id="workspace-title" class="text-xl font-black text-white tracking-widest uppercase">NAMA PANEL</h3>
+                            <p id="workspace-desc" class="text-xs text-slate-400 mt-1">Deskripsi panel</p>
+                        </div>
+                        <span class="px-3 py-1 bg-cyan-900/40 border border-cyan-700/50 text-cyan-300 text-xs font-bold rounded-full">Active Module</span>
                     </div>
-                    
-                    <h3 id="workspace-title" class="text-2xl font-black text-white tracking-widest mb-3 uppercase text-center">NAMA PANEL</h3>
-                    <p id="workspace-desc" class="text-sm text-slate-400 text-center max-w-xl">
-                        Deskripsi panel akan muncul di sini.
-                    </p>
 
-                    <div class="mt-10 w-full bg-slate-900/50 border border-dashed border-slate-700 rounded-lg p-10 flex items-center justify-center">
-                        <p class="text-slate-500 text-sm font-mono flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-                            AREA KERJA USER UNTUK PANEL INI
-                        </p>
-                    </div>
+                    <div id="workspace-content-body"></div>
                 </div>
             </div>
 
@@ -165,112 +216,487 @@
     <script>
         window.onload = function() {
             let currentUser = JSON.parse(localStorage.getItem('current_user'));
-            
-            if(!currentUser) {
-                window.location.href = 'login-user.html';
-                return;
-            }
 
             document.getElementById('display-name-header').innerText = currentUser.name;
             document.getElementById('input-nama-profil').value = currentUser.name;
             document.getElementById('input-email-profil').value = currentUser.email;
             
-            let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=06b6d4&color=fff`;
+            let avatarUrl = currentUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=06b6d4&color=fff`;
             document.getElementById('header-avatar').src = avatarUrl;
-            document.getElementById('preview-foto').src = avatarUrl + "&size=150";
+            document.getElementById('preview-foto').src = avatarUrl;
 
+            cekStatusLanggananUser(currentUser);
             muatMenuUser(currentUser.email);
+            muatTemaUserTersimpan();
+            renderCustomWallpaperSection(currentUser);
         }
 
-        // ==========================================
-        // FUNGSI MEMUAT MENU DAN DESKRIPSI DINAMIS
-        // ==========================================
+        function cekStatusLanggananUser(user) {
+            let badgeText = document.getElementById('sub-status-text');
+            let sekarang = new Date().getTime();
+
+            if (user.customUiAllowed && user.customUiExpiry && sekarang < user.customUiExpiry) {
+                let tglExp = new Date(user.customUiExpiry).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'});
+                badgeText.innerHTML = `<span class="text-emerald-400 font-bold">AKTIF</span><br><span class="text-[10px] text-cyan-300">${user.jenisLayananAktif || 'Layanan Berbayar'}</span><br><span class="text-[9px] text-slate-400">Exp: ${tglExp}</span>`;
+            } else {
+                badgeText.innerHTML = `<span class="text-slate-400">Free / Standard</span>`;
+            }
+        }
+
         function muatMenuUser(userEmail) {
             let menus = JSON.parse(localStorage.getItem('db_menus')) || [];
             let container = document.getElementById('userMenuContainer');
             container.innerHTML = '';
 
-            // Filter menu sesuai hak akses
+            let cleanEmail = (userEmail || '').trim().toLowerCase();
+
             let allowedMenus = menus.filter(menu => {
-                return menu.allowedUsers.includes('all') || menu.allowedUsers.includes(userEmail);
+                if (!menu.allowedUsers) return false;
+                let lowerAllowed = menu.allowedUsers.map(e => e.toLowerCase());
+                return lowerAllowed.includes(cleanEmail);
             });
             
-            // Urutkan Abjad
             allowedMenus.sort((a, b) => a.name.localeCompare(b.name, undefined, {sensitivity: 'base'}));
 
             if(allowedMenus.length === 0) {
-                container.innerHTML = `<div class="col-span-full p-8 text-center glass-card rounded-xl text-slate-400">Belum ada menu panel yang diizinkan untuk akun Anda. Hubungi Administrator.</div>`;
+                container.innerHTML = `<div class="col-span-full p-8 text-center glass-card rounded-xl text-slate-400">Belum ada menu panel yang diizinkan untuk akun Anda. Silakan hubungi Administrator untuk memberikan akses.</div>`;
                 return;
             }
 
             allowedMenus.forEach(menu => {
                 let card = document.createElement('div');
                 card.className = "glass-card p-6 rounded-xl hover:border-cyan-500 transition group cursor-pointer flex flex-col";
-                
-                // HTML Card Menu dengan Deskripsi yang ditarik dari Database Admin
                 card.innerHTML = `
                     <div class="w-12 h-12 bg-cyan-900/50 rounded-lg flex items-center justify-center mb-4 text-cyan-400 group-hover:bg-cyan-500 group-hover:text-white transition">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                     </div>
                     <h3 class="text-lg font-bold text-white mb-2">${menu.name}</h3>
                     <div class="text-sm text-slate-400 flex-1">${menu.desc}</div>
+                    <div class="mt-4 text-xs font-bold text-cyan-400 flex items-center gap-1 group-hover:translate-x-1 transition">Buka Workspace &rarr;</div>
                 `;
-                
-                // Aksi saat user mengklik menu panel
-                card.onclick = function() {
-                    bukaWorkspacePanelUser(menu.name, menu.desc);
-                };
-
+                card.onclick = function() { bukaWorkspacePanelUser(menu.name, menu.desc); };
                 container.appendChild(card);
             });
         }
 
-        // ==========================================
-        // NAVIGASI
-        // ==========================================
-        function switchTab(tabId) {
-            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
-
-            if(document.getElementById('nav-' + tabId)) {
-                document.getElementById('nav-' + tabId).classList.add('active');
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'db_menus' || e.key === 'db_users') {
+                let currentUser = JSON.parse(localStorage.getItem('current_user'));
+                let users = JSON.parse(localStorage.getItem('db_users')) || [];
+                if (currentUser && currentUser.email) {
+                    let latest = users.find(u => u.email.toLowerCase() === currentUser.email.toLowerCase());
+                    if (latest) {
+                        localStorage.setItem('current_user', JSON.stringify(latest));
+                        currentUser = latest;
+                    }
+                    muatMenuUser(currentUser.email);
+                    cekStatusLanggananUser(currentUser);
+                    renderCustomWallpaperSection(currentUser);
+                }
             }
+        });
+
+        // ==========================================
+        // RENDER KONTROL WALLPAPER KUSTOM (BERDASARKAN IZIN ADMIN)
+        // ==========================================
+        function renderCustomWallpaperSection(user) {
+            let container = document.getElementById('customWallpaperWrapper');
+            if (!container) return;
+
+            let sekarang = new Date().getTime();
+            // Cek apakah admin sudah mengaktifkan layanan berbayar dan belum kedaluwarsa
+            let isActive = user.customUiAllowed && user.customUiExpiry && sekarang < user.customUiExpiry;
+
+            if (isActive) {
+                container.innerHTML = `
+                    <div class="p-5 bg-slate-900/60 rounded-lg border border-slate-700 space-y-4">
+                        <label class="block text-xs font-bold text-slate-300">Unggah Wallpaper Baru ke Galeri:</label>
+                        <input type="file" id="uploadWallpaperUser" accept="image/*" onchange="tambahWallpaperUserGaleri(event)" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-500 cursor-pointer">
+                        
+                        <div class="pt-2">
+                            <label class="block text-xs font-bold text-cyan-400 mb-2">Pilih dari Galeri Tersimpan:</label>
+                            <div id="userGalleryContainer" class="grid grid-cols-3 md:grid-cols-4 gap-3"></div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-700">
+                            <button onclick="resetWallpaperUser()" class="px-3 py-1.5 bg-rose-900/40 hover:bg-rose-700 text-rose-300 rounded text-xs transition border border-rose-800 font-bold">Reset ke Tema Default</button>
+                        </div>
+                    </div>
+                `;
+                renderUserGallery();
+            } else {
+                container.innerHTML = `
+                    <div class="p-6 bg-slate-900/40 rounded-lg border border-rose-500/30 text-center space-y-3">
+                        <div class="text-rose-400 font-bold text-sm">🔒 Fitur Terkunci (Layanan Berbayar)</div>
+                        <p class="text-xs text-slate-400 max-w-md mx-auto">
+                            Galeri Wallpaper Kustom dan unggah gambar eksklusif memerlukan aktivasi layanan berbayar atau izin khusus dari Administrator. Silakan hubungi admin untuk mengaktifkan layanan ini.
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        function terapkanTemaUser(namaTema) {
+            let root = document.documentElement;
+            root.style.setProperty('--bg-image', 'none');
+            if(namaTema === 'cyber') { root.style.setProperty('--bg-main', '#0f172a'); }
+            else if(namaTema === 'matrix') { root.style.setProperty('--bg-main', '#022c22'); }
+            else if(namaTema === 'crimson') { root.style.setProperty('--bg-main', '#450a0a'); }
+            else if(namaTema === 'gold') { root.style.setProperty('--bg-main', '#451a03'); }
+            localStorage.setItem('theme_user_eko', namaTema);
+            localStorage.removeItem('active_wallpaper_user_eko');
+            alert('Tema berhasil diterapkan!');
+        }
+
+        function tambahWallpaperUserGaleri(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    let base64Image = e.target.result;
+                    let gallery = JSON.parse(localStorage.getItem('gallery_user_eko')) || [];
+                    gallery.unshift(base64Image);
+                    localStorage.setItem('gallery_user_eko', JSON.stringify(gallery));
+                    renderUserGallery();
+                    pakaiWallpaperUser(base64Image);
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function renderUserGallery() {
+            let container = document.getElementById('userGalleryContainer');
+            if(!container) return;
+            let gallery = JSON.parse(localStorage.getItem('gallery_user_eko')) || [];
             
-            document.getElementById('section-' + tabId).classList.add('active');
-            
-            let title = 'MENU PANEL';
-            if(tabId === 'profil') title = 'PROFIL SAYA';
-            document.getElementById('header-title').innerText = title;
+            if(gallery.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 italic col-span-full">Belum ada wallpaper tersimpan.</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            gallery.forEach((imgSrc, index) => {
+                container.innerHTML += `
+                    <div class="relative group border border-slate-700 rounded-lg overflow-hidden h-20 bg-slate-900">
+                        <img src="${imgSrc}" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition" onclick="pakaiWallpaperUser('${imgSrc}')" title="Klik untuk pasang wallpaper">
+                        <button onclick="hapusWallpaperUserGaleri(${index})" class="absolute top-1 right-1 bg-rose-600 hover:bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded shadow opacity-0 group-hover:opacity-100 transition">Hapus</button>
+                    </div>
+                `;
+            });
+        }
+
+        function pakaiWallpaperUser(imgSrc) {
+            document.documentElement.style.setProperty('--bg-image', `url('${imgSrc}')`);
+            localStorage.setItem('active_wallpaper_user_eko', imgSrc);
+            alert('Wallpaper berhasil dipasang!');
+        }
+
+        function hapusWallpaperUserGaleri(index) {
+            if(confirm('Hapus wallpaper ini dari galeri?')) {
+                let gallery = JSON.parse(localStorage.getItem('gallery_user_eko')) || [];
+                gallery.splice(index, 1);
+                localStorage.setItem('gallery_user_eko', JSON.stringify(gallery));
+                renderUserGallery();
+            }
+        }
+
+        function resetWallpaperUser() {
+            localStorage.removeItem('active_wallpaper_user_eko');
+            terapkanTemaUser('cyber');
+            alert('Tema dikembalikan ke default.');
+        }
+
+        function muatTemaUserTersimpan() {
+            let savedWp = localStorage.getItem('active_wallpaper_user_eko');
+            if(savedWp) {
+                document.documentElement.style.setProperty('--bg-image', `url('${savedWp}')`);
+            } else {
+                let savedTh = localStorage.getItem('theme_user_eko');
+                if(savedTh) terapkanTemaUser(savedTh);
+            }
         }
 
         function bukaWorkspacePanelUser(name, desc) {
             document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
 
-            document.getElementById('nav-panel').classList.add('active'); // Tetap sorot sidebar menu panel
+            document.getElementById('nav-panel').classList.add('active');
             document.getElementById('section-workspace').classList.add('active');
             
             document.getElementById('header-title').innerText = 'WORKSPACE: ' + name.toUpperCase();
             document.getElementById('workspace-title').innerText = name.toUpperCase();
             document.getElementById('workspace-desc').innerText = desc;
+
+            let contentBody = document.getElementById('workspace-content-body');
+
+            if(name.toLowerCase() === 'daftar') {
+                contentBody.innerHTML = `
+                    <div class="space-y-6 w-full text-left">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-cyan-400 mb-1">Target Platform</label>
+                                <select id="userBotTargetPlatform" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
+                                    <option value="https://mez.ink/">https://mez.ink/ (Aktif)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-cyan-400 mb-1">Nama Akun</label>
+                                <input type="text" id="userBotAccountName" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-white focus:outline-none focus:border-cyan-500" placeholder="Cth: Eko Store">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-cyan-400 mb-1">Email Registrasi</label>
+                                <input type="email" id="userBotEmail" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-white focus:outline-none focus:border-cyan-500" placeholder="user@email.com">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-cyan-400 mb-1">Password Akun</label>
+                                <input type="password" id="userBotPassword" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-white focus:outline-none focus:border-cyan-500" placeholder="••••••••">
+                            </div>
+                            <div class="flex items-end">
+                                <div class="w-full p-3 bg-slate-900/60 border border-slate-800 rounded flex justify-between items-center">
+                                    <span class="text-xs text-slate-400">Total Tautan Bio Link: <b id="userCounterTautan" class="text-emerald-400">1</b></span>
+                                    <button type="button" onclick="userTambahBarisTautan()" class="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs font-bold transition">+ Tambah Tautan</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-cyan-400 mb-1">Arah Urutan Pengisian Tautan</label>
+                            <select id="userBotFillDirection" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
+                                <option value="top-to-bottom">Dari Atas ke Bawah (Urutan Normal)</option>
+                                <option value="bottom-to-top">Dari Bawah ke Atas (Urutan Dibalik)</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="block text-xs font-bold text-cyan-400 uppercase tracking-widest">Daftar Title & URL Bio Link</label>
+                            <div id="userTautanContainer" class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                                <div class="flex gap-2 items-center user-tautan-row bg-slate-900/40 p-2 rounded border border-slate-800">
+                                    <input type="text" placeholder="Title (Cth: Official WhatsApp)" class="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-cyan-500 user-tautan-title">
+                                    <input type="text" placeholder="URL (Cth: https://wa.me/...)" class="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-cyan-500 user-tautan-url">
+                                    <button type="button" onclick="userHapusBarisTautan(this)" class="px-2.5 py-2 bg-rose-900/30 hover:bg-rose-700 text-rose-300 rounded text-xs transition border border-rose-800 font-bold">Hapus</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4 pt-2">
+                            <button onclick="userSimpanDataBot()" class="px-5 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded text-sm transition shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                                💾 SIMPAN DATA BOT
+                            </button>
+                            <button onclick="userJalankanBotDaftar()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded text-sm transition shadow-[0_0_15px_rgba(16,185,129,0.3)] flex items-center gap-2">
+                                🚀 JALANKAN BOT OTOMATIS
+                            </button>
+                            <button onclick="userResetFormBot()" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-sm transition">Reset Form</button>
+                        </div>
+
+                        <div class="mt-6">
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Terminal Log Aktivitas Bot</label>
+                            <div id="userBotConsoleLog" class="w-full h-48 bg-black/80 border border-slate-800 rounded p-4 font-mono text-xs text-emerald-400 overflow-y-auto space-y-1">
+                                <p class="text-slate-500">[System] Bot automation engine siap dijalankan oleh member.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                userMuatKonfigurasiBotTersimpan();
+            } else {
+                contentBody.innerHTML = `
+                    <div class="text-center p-8 bg-slate-900/40 rounded border border-slate-700/50">
+                        <p class="text-white text-base font-bold mb-2">Modul Panel: ${name}</p>
+                        <p class="text-slate-400 text-sm max-w-lg mx-auto mb-6">${desc}</p>
+                        <div class="p-4 bg-slate-900 rounded border border-slate-700 text-xs text-cyan-400 font-mono inline-block">
+                            [Status] Modul aktif dan siap digunakan.
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function userTambahBarisTautan(titleVal = '', urlVal = '') {
+            let container = document.getElementById('userTautanContainer');
+            let row = document.createElement('div');
+            row.className = "flex gap-2 items-center user-tautan-row bg-slate-900/40 p-2 rounded border border-slate-800";
+            row.innerHTML = `
+                <input type="text" placeholder="Title (Cth: Official WhatsApp)" value="${titleVal}" class="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-cyan-500 user-tautan-title">
+                <input type="text" placeholder="URL (Cth: https://wa.me/...)" value="${urlVal}" class="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-cyan-500 user-tautan-url">
+                <button type="button" onclick="userHapusBarisTautan(this)" class="px-2.5 py-2 bg-rose-900/30 hover:bg-rose-700 text-rose-300 rounded text-xs transition border border-rose-800 font-bold">Hapus</button>
+            `;
+            container.appendChild(row);
+            userUpdateCounterTautan();
+        }
+
+        function userHapusBarisTautan(btn) {
+            let rows = document.querySelectorAll('.user-tautan-row');
+            if(rows.length > 1) {
+                btn.closest('.user-tautan-row').remove();
+                userUpdateCounterTautan();
+            } else {
+                alert('Minimal harus menyisakan 1 baris tautan.');
+            }
+        }
+
+        function userUpdateCounterTautan() {
+            let count = document.querySelectorAll('.user-tautan-row').length;
+            document.getElementById('userCounterTautan').innerText = count;
+        }
+
+        function userSimpanDataBot() {
+            let platform = document.getElementById('userBotTargetPlatform').value;
+            let akun = document.getElementById('userBotAccountName').value;
+            let email = document.getElementById('userBotEmail').value;
+            let pass = document.getElementById('userBotPassword').value;
+            let fillDirection = document.getElementById('userBotFillDirection').value;
+            
+            let tautanList = [];
+            document.querySelectorAll('.user-tautan-row').forEach(row => {
+                let t = row.querySelector('.user-tautan-title').value;
+                let u = row.querySelector('.user-tautan-url').value;
+                if(t || u) tautanList.push({ title: t, url: u });
+            });
+
+            let config = { platform, akun, email, pass, fillDirection, tautanList };
+            localStorage.setItem('bot_config_daftar', JSON.stringify(config));
+            alert('Konfigurasi Bot & Daftar Tautan Berhasil Disimpan!');
+        }
+
+        function userMuatKonfigurasiBotTersimpan() {
+            let saved = localStorage.getItem('bot_config_daftar');
+            if(saved) {
+                let config = JSON.parse(saved);
+                if(document.getElementById('userBotTargetPlatform')) document.getElementById('userBotTargetPlatform').value = config.platform || 'https://mez.ink/';
+                if(document.getElementById('userBotAccountName')) document.getElementById('userBotAccountName').value = config.akun || '';
+                if(document.getElementById('userBotEmail')) document.getElementById('userBotEmail').value = config.email || '';
+                if(document.getElementById('userBotPassword')) document.getElementById('userBotPassword').value = config.pass || '';
+                if(config.fillDirection && document.getElementById('userBotFillDirection')) {
+                    document.getElementById('userBotFillDirection').value = config.fillDirection;
+                }
+
+                if(config.tautanList && config.tautanList.length > 0) {
+                    let container = document.getElementById('userTautanContainer');
+                    if(container) {
+                        container.innerHTML = '';
+                        config.tautanList.forEach(item => {
+                            userTambahBarisTautan(item.title, item.url);
+                        });
+                    }
+                }
+            }
+        }
+
+        function userResetFormBot() {
+            document.getElementById('userBotAccountName').value = '';
+            document.getElementById('userBotEmail').value = '';
+            document.getElementById('userBotPassword').value = '';
+            document.getElementById('userBotFillDirection').value = 'top-to-bottom';
+            document.getElementById('userTautanContainer').innerHTML = `
+                <div class="flex gap-2 items-center user-tautan-row bg-slate-900/40 p-2 rounded border border-slate-800">
+                    <input type="text" placeholder="Title (Cth: Official WhatsApp)" class="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-cyan-500 user-tautan-title">
+                    <input type="text" placeholder="URL (Cth: https://wa.me/...)" class="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-cyan-500 user-tautan-url">
+                    <button type="button" onclick="userHapusBarisTautan(this)" class="px-2.5 py-2 bg-rose-900/30 hover:bg-rose-700 text-rose-300 rounded text-xs transition border border-rose-800 font-bold">Hapus</button>
+                </div>
+            `;
+            userUpdateCounterTautan();
+            localStorage.removeItem('bot_config_daftar');
+            document.getElementById('userBotConsoleLog').innerHTML = `<p class="text-slate-500">[System] Form dibersihkan.</p>`;
+        }
+
+        function userJalankanBotDaftar() {
+            let platform = document.getElementById('userBotTargetPlatform').value;
+            let akun = document.getElementById('userBotAccountName').value;
+            let email = document.getElementById('userBotEmail').value;
+            let pass = document.getElementById('userBotPassword').value;
+            let fillDirection = document.getElementById('userBotFillDirection').value;
+            let consoleLog = document.getElementById('userBotConsoleLog');
+
+            let tautanList = [];
+            document.querySelectorAll('.user-tautan-row').forEach(row => {
+                let t = row.querySelector('.user-tautan-title').value;
+                let u = row.querySelector('.user-tautan-url').value;
+                if(t && u) tautanList.push({ title: t, url: u });
+            });
+
+            if(!akun || !email || !pass || tautanList.length === 0) {
+                alert('Harap lengkapi nama akun, email, password, dan minimal 1 pasang Title & URL yang valid!');
+                return;
+            }
+
+            consoleLog.innerHTML += `<p class="text-cyan-400">[Bot] Mengirim payload data ke server lokal...</p>`;
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+
+            fetch('http://localhost:3000/run-bot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ platform, akun, email, password: pass, fillDirection, tautanList })
+            })
+            .then(response => response.json())
+            .then(data => {
+                setTimeout(() => {
+                    consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success] Bot otomatis berhasil berjalan di sisi server!</p>`;
+                    consoleLog.scrollTop = consoleLog.scrollHeight;
+                }, 2000);
+            })
+            .catch(err => {
+                consoleLog.innerHTML += `<p class="text-rose-400">[Error] Gagal terhubung ke server lokal. Pastikan server (server.js) aktif.</p>`;
+                consoleLog.scrollTop = consoleLog.scrollHeight;
+            });
+        }
+
+        function simpanProfilUser() {
+            let currentUser = JSON.parse(localStorage.getItem('current_user'));
+            let users = JSON.parse(localStorage.getItem('db_users')) || [];
+            if (!currentUser) return;
+
+            let namaBaru = document.getElementById('input-nama-profil').value.trim();
+            let passwordBaru = document.getElementById('input-password-profil').value;
+            let fotoBaru = document.getElementById('preview-foto').src;
+
+            if (!namaBaru) { alert('Nama lengkap tidak boleh kosong!'); return; }
+
+            currentUser.name = namaBaru;
+            if (passwordBaru) currentUser.password = passwordBaru;
+            currentUser.avatar = fotoBaru;
+
+            let index = users.findIndex(u => u.email.toLowerCase() === currentUser.email.toLowerCase());
+            if (index > -1) {
+                users[index] = currentUser;
+                localStorage.setItem('db_users', JSON.stringify(users));
+            }
+            localStorage.setItem('current_user', JSON.stringify(currentUser));
+
+            document.getElementById('display-name-header').innerText = currentUser.name;
+            document.getElementById('header-avatar').src = fotoBaru;
+            alert('Profil berhasil diperbarui!');
         }
 
         function previewImage(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('preview-foto').src = e.target.result;
-                    document.getElementById('header-avatar').src = e.target.result;
-                }
+                reader.onload = function(e) { document.getElementById('preview-foto').src = e.target.result; }
                 reader.readAsDataURL(file);
             }
         }
 
+        function switchTab(tabId) {
+            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            if(document.getElementById('nav-' + tabId)) document.getElementById('nav-' + tabId).classList.add('active');
+            document.getElementById('section-' + tabId).classList.add('active');
+            
+            if (tabId === 'profil') {
+                document.getElementById('header-title').innerText = 'PROFIL SAYA';
+            } else if (tabId === 'tema') {
+                document.getElementById('header-title').innerText = 'TEMA & WALLPAPER';
+                let currentUser = JSON.parse(localStorage.getItem('current_user'));
+                renderCustomWallpaperSection(currentUser);
+            } else {
+                document.getElementById('header-title').innerText = 'MENU PANEL';
+            }
+        }
+
         function logoutUser() {
-            if(confirm('Apakah Anda yakin ingin keluar dari Panel Eko?')) {
+            if(confirm('Apakah Anda yakin ingin keluar?')) {
                 localStorage.removeItem('current_user'); 
                 window.location.href = 'login-user.html'; 
             }
