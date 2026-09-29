@@ -29,6 +29,16 @@
             <p class="text-xs text-cyan-400 mt-1 uppercase tracking-widest">Panel Eko User Portal</p>
         </div>
 
+        <!-- KOTAK NOTIFIKASI WARNING BERKEDIP (TERSEMBUNYI SECARA DEFAULT) -->
+        <div id="bannedNotification" class="hidden mb-5 p-4 bg-rose-950/90 border border-rose-500 rounded-xl flex items-center gap-3 animate-pulse shadow-[0_0_20px_rgba(244,63,94,0.4)]">
+            <div class="w-8 h-8 rounded-full bg-rose-600 flex items-center justify-center flex-shrink-0 animate-bounce">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <p id="bannedText" class="text-xs font-bold text-rose-200 leading-relaxed uppercase tracking-wide"></p>
+        </div>
+
         <form id="loginUserForm" class="space-y-5">
             <div>
                 <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Email Terdaftar</label>
@@ -50,38 +60,42 @@
     </div>
 
     <script>
-        // Pastikan saat halaman login dibuka, sesi lama yang tidak sah dibersihkan
-        if (localStorage.getItem('current_user')) {
-            let session = JSON.parse(localStorage.getItem('current_user'));
-            if (!session.email || !session.status) {
-                localStorage.removeItem('current_user');
-            }
-        }
-
         document.getElementById('loginUserForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
 
             let users = JSON.parse(localStorage.getItem('db_users')) || [];
-            let foundUser = users.find(u => u.email === email && u.password === password);
+            let foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+
+            let notifBox = document.getElementById('bannedNotification');
+            let notifText = document.getElementById('bannedText');
 
             if (!foundUser) {
-                alert('Email atau password salah, atau akun belum terdaftar!');
+                notifBox.classList.remove('hidden');
+                notifText.innerText = "Email atau password salah, atau akun tidak ditemukan!";
                 return;
             }
 
             if (foundUser.status === 'pending') {
-                alert('Akun Anda masih dalam antrean verifikasi (Pending). Harap tunggu Administrator melakukan ACC di halaman Admin.');
+                notifBox.classList.remove('hidden');
+                notifText.innerText = "Akun Anda masih dalam antrean verifikasi (Pending). Harap tunggu Administrator melakukan ACC.";
                 return;
             }
 
+            // CEK KUNCI / BANNED OLEH ADMIN
+            if (foundUser.isLocked === true) {
+                notifBox.classList.remove('hidden');
+                notifText.innerText = "Maaf akun anda untuk saat ini di banned oleh sistem kami silahkan hubungi pusat layanan panel eko !";
+                return; // Mencegah proses login sepenuhnya
+            }
+
             if (foundUser.status === 'active') {
-                // Simpan data user aktif secara lengkap ke sesi
                 localStorage.setItem('current_user', JSON.stringify(foundUser));
-                window.location.href = 'index.html'; // Masuk ke User Dashboard dengan aman
+                window.location.href = 'index.html';
             } else {
-                alert('Akses akun ditolak atau diblokir oleh Administrator.');
+                notifBox.classList.remove('hidden');
+                notifText.innerText = "Akses akun ditolak atau diblokir oleh Administrator.";
             }
         });
     </script>

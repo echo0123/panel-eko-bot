@@ -160,8 +160,9 @@
                                 <tr class="bg-zinc-900/50 text-xs uppercase tracking-wider text-zinc-500 border-b border-zinc-800">
                                     <th class="p-4">Nama Lengkap</th>
                                     <th class="p-4">Email</th>
+                                    <th class="p-4">Password</th>
                                     <th class="p-4 text-center">Status</th>
-                                    <th class="p-4 text-center">Hapus Akun</th>
+                                    <th class="p-4 text-center">Aksi Kontrol</th>
                                 </tr>
                             </thead>
                             <tbody id="activeTableBody"></tbody>
@@ -311,7 +312,7 @@
                 </div>
             </div>
 
-            <!-- TAB 5: WORKSPACE DINAMIS (BOT PENDAPATAN / DAFTAR OTOMATIS) -->
+            <!-- TAB 5: WORKSPACE DINAMIS -->
             <div id="section-dynamic-workspace" class="content-section">
                 <div class="glass-card rounded-lg p-8 space-y-6 border border-violet-500/30">
                     <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
@@ -322,7 +323,6 @@
                         <span class="px-3 py-1 bg-violet-900/40 border border-violet-700/50 text-violet-300 text-xs font-bold rounded-full">Bot Automation Engine</span>
                     </div>
 
-                    <!-- KONTROL BOT KHUSUS UNTUK PANEL "daftar" -->
                     <div id="botControlContainer" class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
@@ -356,7 +356,6 @@
                             </div>
                         </div>
 
-                        <!-- PILIHAN ARAH URUTAN PENGISIAN TAUTAN -->
                         <div>
                             <label class="block text-xs font-bold text-violet-400 mb-1">Arah Urutan Pengisian Tautan (Title & URL)</label>
                             <select id="botFillDirection" class="w-full bg-zinc-900 border border-zinc-700 rounded p-2.5 text-sm text-white focus:outline-none focus:border-violet-500">
@@ -365,7 +364,6 @@
                             </select>
                         </div>
 
-                        <!-- CONTAINER MULTIPLE TAUTAN -->
                         <div class="space-y-3">
                             <label class="block text-xs font-bold text-violet-400 uppercase tracking-widest">Daftar Title & URL Bio Link (Multiple Payload)</label>
                             <div id="tautanContainer" class="space-y-3 max-h-60 overflow-y-auto pr-2">
@@ -387,7 +385,6 @@
                             <button onclick="resetFormBot()" class="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded text-sm transition">Reset Form</button>
                         </div>
 
-                        <!-- TERMINAL KONSOL -->
                         <div class="mt-6">
                             <label class="block text-xs font-bold text-zinc-400 uppercase mb-2">Terminal Log Aktivitas Bot (Termux Console)</label>
                             <div id="botConsoleLog" class="w-full h-48 bg-black/80 border border-zinc-800 rounded p-4 font-mono text-xs text-emerald-400 overflow-y-auto space-y-1">
@@ -401,7 +398,7 @@
         </div>
     </main>
 
-    <!-- MODAL-MODAL ADMIN -->
+    <!-- MODAL MODAL ADMIN -->
     <div id="modalAksesUser" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 items-center justify-center hidden">
         <div class="glass-card w-full max-w-md rounded-lg overflow-hidden border border-violet-500 shadow-[0_0_30px_rgba(139,92,246,0.3)]">
             <div class="p-5 border-b border-zinc-800 flex justify-between items-center bg-zinc-900">
@@ -594,7 +591,6 @@
             }
         }
 
-        // FUNGSI MULTIPLE TAUTAN (TAMBAH & HAPUS BARIS)
         function tambahBarisTautan(titleVal = '', urlVal = '') {
             let container = document.getElementById('tautanContainer');
             let row = document.createElement('div');
@@ -664,7 +660,6 @@
             }
         }
 
-        // SIMULASI EKSEKUSI BOT DENGAN UKURAN RAMPING & KONEKSI SERVER
         function jalankanBotDaftar() {
             let platform = document.getElementById('botTargetPlatform').value;
             let akun = document.getElementById('botAccountName').value;
@@ -686,15 +681,8 @@
             }
 
             consoleLog.innerHTML += `<p class="text-cyan-400">[Bot] Mempersiapkan payload data untuk: ${platform} (Mode: ${fillDirection})</p>`;
-            consoleLog.innerHTML += `<p class="text-zinc-300">[Data] Akun: ${akun} | Email: ${email} | Tautan: ${tautanList.length} link</p>`;
             consoleLog.scrollTop = consoleLog.scrollHeight;
 
-            setTimeout(() => {
-                consoleLog.innerHTML += `<p class="text-yellow-400">[System] Menyesuaikan jendela browser ukuran ramping di sisi kanan...</p>`;
-                consoleLog.scrollTop = consoleLog.scrollHeight;
-            }, 1000);
-
-            // Mengirim data ke server lokal untuk memicu bot pengetikan otomatis beserta pilihan arah pengisiannya
             fetch('http://localhost:3000/run-bot', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -730,6 +718,7 @@
             document.getElementById('botConsoleLog').innerHTML = `<p class="text-zinc-500">[System] Form dibersihkan.</p>`;
         }
 
+        // FUNGSI MANAJEMEN USER DENGAN PASSWORD, LOCK, DAN RESET
         function muatDataUser() {
             let users = JSON.parse(localStorage.getItem('db_users')) || [];
             let pendingBody = document.getElementById('pendingTableBody');
@@ -754,13 +743,20 @@
                     `;
                 } else if(user.status === 'active') {
                     activeCount++;
+                    let lockStatusText = user.isLocked ? '<span class="bg-rose-900/40 text-rose-500 text-xs px-2 py-1 rounded">Terkunci</span>' : '<span class="bg-emerald-900/40 text-emerald-500 text-xs px-2 py-1 rounded">Aktif</span>';
+                    let lockBtnText = user.isLocked ? 'Buka' : 'Kunci';
+                    let lockBtnClass = user.isLocked ? 'bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600' : 'bg-amber-600/20 text-amber-400 hover:bg-amber-600';
+
                     activeBody.innerHTML += `
                         <tr class="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition">
                             <td class="p-4 font-medium text-zinc-200">${user.name}</td>
                             <td class="p-4 text-zinc-400">${user.email}</td>
-                            <td class="p-4 text-center"><span class="bg-emerald-900/40 text-emerald-500 text-xs px-2 py-1 rounded">Aktif</span></td>
-                            <td class="p-4 text-center">
-                                <button onclick="hapusUser('${user.email}', 'Hapus')" class="px-3 py-1 bg-rose-900/30 hover:bg-rose-600 text-rose-400 hover:text-white rounded transition text-xs font-bold">Hapus Akun</button>
+                            <td class="p-4 text-zinc-300 font-mono text-xs">${user.password || '-'}</td>
+                            <td class="p-4 text-center">${lockStatusText}</td>
+                            <td class="p-4 text-center space-x-1 whitespace-nowrap">
+                                <button onclick="toggleLockUser('${user.email}')" class="px-2.5 py-1 rounded text-xs font-bold transition ${lockBtnClass}">${lockBtnText}</button>
+                                <button onclick="resetPasswordUser('${user.email}')" class="px-2.5 py-1 bg-cyan-600/20 hover:bg-cyan-600 text-cyan-400 hover:text-white rounded text-xs font-bold transition">Reset Pass</button>
+                                <button onclick="hapusUser('${user.email}', 'Hapus')" class="px-2.5 py-1 bg-rose-900/30 hover:bg-rose-600 text-rose-400 hover:text-white rounded text-xs font-bold transition">Hapus</button>
                             </td>
                         </tr>
                     `;
@@ -768,11 +764,36 @@
             });
 
             if(pendingCount===0) pendingBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-zinc-500 italic">Tidak ada antrean pendaftaran.</td></tr>`;
-            if(activeCount===0) activeBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-zinc-500 italic">Belum ada user aktif.</td></tr>`;
+            if(activeCount===0) activeBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-zinc-500 italic">Belum ada user aktif.</td></tr>`;
 
             document.getElementById('statPending').innerText = pendingCount;
             document.getElementById('pendingBadge').innerText = pendingCount;
             document.getElementById('statActive').innerText = activeCount;
+        }
+
+        function toggleLockUser(email) {
+            let users = JSON.parse(localStorage.getItem('db_users')) || [];
+            let user = users.find(u => u.email === email);
+            if(user) {
+                user.isLocked = !user.isLocked;
+                localStorage.setItem('db_users', JSON.stringify(users));
+                muatDataUser();
+                muatDataAksesLengkap();
+            }
+        }
+
+        function resetPasswordUser(email) {
+            let newPass = prompt("Masukkan password baru untuk akun " + email + ":");
+            if(newPass !== null && newPass.trim() !== "") {
+                let users = JSON.parse(localStorage.getItem('db_users')) || [];
+                let user = users.find(u => u.email === email);
+                if(user) {
+                    user.password = newPass.trim();
+                    localStorage.setItem('db_users', JSON.stringify(users));
+                    alert("Password berhasil direset!");
+                    muatDataUser();
+                }
+            }
         }
 
         function accUser(email) {
@@ -841,7 +862,7 @@
                 accessTable.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-zinc-500 italic">Belum ada member aktif.</td></tr>`;
             } else {
                 activeUsers.forEach(user => {
-                    let accessibleMenus = menus.filter(m => m.allowedUsers.includes(user.email));
+                    let accessibleMenus = menus.filter(m => m.allowedUsers && m.allowedUsers.includes(user.email));
                     let badges = accessibleMenus.map(m => `<span class="bg-violet-900/40 text-violet-400 border border-violet-700/50 text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap">${m.name}</span>`).join(' ');
                     if(badges === '') badges = `<span class="text-xs text-zinc-600 italic">Belum ada panel.</span>`;
 
@@ -952,7 +973,6 @@
             muatDataKeuangan();
         }
 
-        // TEMA & GALERI ADMIN
         function terapkanTemaAdmin(namaTema) {
             let root = document.documentElement;
             root.style.setProperty('--bg-image', 'none');
@@ -1173,7 +1193,7 @@
             let container = document.getElementById('panelChecklistContainer');
             container.innerHTML = '';
             menus.forEach(menu => {
-                let isChecked = menu.allowedUsers.includes(email) ? 'checked' : '';
+                let isChecked = menu.allowedUsers && menu.allowedUsers.includes(email) ? 'checked' : '';
                 container.innerHTML += `
                     <label class="flex items-center gap-3 p-3 bg-zinc-800 rounded border border-zinc-700 cursor-pointer hover:bg-zinc-700 transition">
                         <input type="checkbox" name="panelAccessCheck" value="${menu.id}" class="w-4 h-4 text-violet-600 rounded bg-zinc-900 border-zinc-600" ${isChecked}>
@@ -1190,6 +1210,7 @@
             let checkedPanelIds = Array.from(document.querySelectorAll('input[name="panelAccessCheck"]:checked')).map(cb => cb.value);
             let menus = JSON.parse(localStorage.getItem('db_menus')) || [];
             menus.forEach(menu => {
+                if(!menu.allowedUsers) menu.allowedUsers = [];
                 if(checkedPanelIds.includes(menu.id)) {
                     if(!menu.allowedUsers.includes(email)) menu.allowedUsers.push(email);
                 } else {

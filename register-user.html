@@ -62,7 +62,7 @@
 
             let users = JSON.parse(localStorage.getItem('db_users')) || [];
 
-            let existing = users.find(u => u.email === email);
+            let existing = users.find(u => u.email.toLowerCase() === email.toLowerCase());
             if (existing) {
                 alert('Email ini sudah terdaftar! Silakan gunakan email lain atau langsung login.');
                 return;
@@ -73,6 +73,7 @@
                 email: email,
                 password: password,
                 status: 'pending',
+                isLocked: false, // Inisialisasi awal akun tidak terkunci
                 customUiAllowed: false,
                 customUiExpiry: null,
                 jenisLayananAktif: null
