@@ -160,8 +160,9 @@
                                 <tr class="bg-zinc-900/50 text-xs uppercase tracking-wider text-zinc-500 border-b border-zinc-800">
                                     <th class="p-4">Nama Lengkap</th>
                                     <th class="p-4">Email</th>
+                                    <th class="p-4">Password</th>
                                     <th class="p-4 text-center">Status</th>
-                                    <th class="p-4 text-center">Hapus Akun</th>
+                                    <th class="p-4 text-center">Aksi Kontrol</th>
                                 </tr>
                             </thead>
                             <tbody id="activeTableBody"></tbody>
@@ -311,7 +312,7 @@
                 </div>
             </div>
 
-            <!-- TAB 5: WORKSPACE DINAMIS (BOT PENDAPATAN / DAFTAR OTOMATIS) -->
+            <!-- TAB 5: WORKSPACE DINAMIS -->
             <div id="section-dynamic-workspace" class="content-section">
                 <div class="glass-card rounded-lg p-8 space-y-6 border border-violet-500/30">
                     <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
@@ -322,7 +323,6 @@
                         <span class="px-3 py-1 bg-violet-900/40 border border-violet-700/50 text-violet-300 text-xs font-bold rounded-full">Bot Automation Engine</span>
                     </div>
 
-                    <!-- KONTROL BOT KHUSUS UNTUK PANEL "daftar" -->
                     <div id="botControlContainer" class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
@@ -356,7 +356,6 @@
                             </div>
                         </div>
 
-                        <!-- PILIHAN ARAH URUTAN PENGISIAN TAUTAN -->
                         <div>
                             <label class="block text-xs font-bold text-violet-400 mb-1">Arah Urutan Pengisian Tautan (Title & URL)</label>
                             <select id="botFillDirection" class="w-full bg-zinc-900 border border-zinc-700 rounded p-2.5 text-sm text-white focus:outline-none focus:border-violet-500">
@@ -365,7 +364,6 @@
                             </select>
                         </div>
 
-                        <!-- CONTAINER MULTIPLE TAUTAN -->
                         <div class="space-y-3">
                             <label class="block text-xs font-bold text-violet-400 uppercase tracking-widest">Daftar Title & URL Bio Link (Multiple Payload)</label>
                             <div id="tautanContainer" class="space-y-3 max-h-60 overflow-y-auto pr-2">
@@ -387,7 +385,6 @@
                             <button onclick="resetFormBot()" class="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded text-sm transition">Reset Form</button>
                         </div>
 
-                        <!-- TERMINAL KONSOL -->
                         <div class="mt-6">
                             <label class="block text-xs font-bold text-zinc-400 uppercase mb-2">Terminal Log Aktivitas Bot (Termux Console)</label>
                             <div id="botConsoleLog" class="w-full h-48 bg-black/80 border border-zinc-800 rounded p-4 font-mono text-xs text-emerald-400 overflow-y-auto space-y-1">
@@ -548,7 +545,6 @@
         function cekAutoOffLangganan() {
             let users = firebaseUsersCache;
             let sekarang = new Date().getTime();
-            let adaPerubahan = false;
             users.forEach(async (user) => {
                 if(user.customUiAllowed && user.customUiExpiry && sekarang > user.customUiExpiry) {
                     try {
@@ -700,13 +696,7 @@
             }
 
             consoleLog.innerHTML += `<p class="text-cyan-400">[Bot] Mempersiapkan payload data untuk: ${platform} (Mode: ${fillDirection})</p>`;
-            consoleLog.innerHTML += `<p class="text-zinc-300">[Data] Akun: ${akun} | Email: ${email} | Tautan: ${tautanList.length} link</p>`;
             consoleLog.scrollTop = consoleLog.scrollHeight;
-
-            setTimeout(() => {
-                consoleLog.innerHTML += `<p class="text-yellow-400">[System] Menyesuaikan jendela browser ukuran ramping di sisi kanan...</p>`;
-                consoleLog.scrollTop = consoleLog.scrollHeight;
-            }, 1000);
 
             fetch('http://localhost:3000/run-bot', {
                 method: 'POST',
@@ -715,13 +705,11 @@
             })
             .then(response => response.json())
             .then(data => {
-                setTimeout(() => {
-                    consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success] Jendela target berhasil dibuka & mengetik otomatis di sisi kanan!</p>`;
-                    consoleLog.scrollTop = consoleLog.scrollHeight;
-                }, 2200);
+                consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success] Jendela target berhasil dibuka & mengetik otomatis!</p>`;
+                consoleLog.scrollTop = consoleLog.scrollHeight;
             })
             .catch(err => {
-                consoleLog.innerHTML += `<p class="text-rose-400">[Error] Gagal terhubung ke server lokal. Pastikan server aktif.</p>`;
+                consoleLog.innerHTML += `<p class="text-rose-400">[Error] Gagal terhubung ke server lokal.</p>`;
                 consoleLog.scrollTop = consoleLog.scrollHeight;
             });
         }
@@ -751,7 +739,7 @@
                     users.push({ id: docSnap.id, ...docSnap.data() });
                 });
                 firebaseUsersCache = users;
-                localStorage.setItem('db_users', JSON.stringify(users)); // Sinkron lokal untuk fitur lain
+                localStorage.setItem('db_users', JSON.stringify(users));
                 muatDataUser();
                 muatDataAksesLengkap();
             });
@@ -780,15 +768,26 @@
                             </td>
                         </tr>
                     `;
-                } else if(status === 'active') {
+                } else {
+                    // Mencakup status 'active' maupun 'locked'
                     activeCount++;
+                    let statusBadge = status === 'active' 
+                        ? '<span class="bg-emerald-900/40 text-emerald-500 text-xs px-2 py-1 rounded font-bold">Aktif</span>' 
+                        : '<span class="bg-rose-900/40 text-rose-500 text-xs px-2 py-1 rounded font-bold">Dikunci</span>';
+                    
+                    let lockBtnText = status === 'active' ? 'Kunci' : 'Buka';
+                    let lockBtnClass = status === 'active' ? 'bg-amber-600/20 hover:bg-amber-600 text-amber-400' : 'bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400';
+
                     activeBody.innerHTML += `
                         <tr class="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition">
                             <td class="p-4 font-medium text-zinc-200">${user.name || '-'}</td>
                             <td class="p-4 text-zinc-400">${user.email || '-'}</td>
-                            <td class="p-4 text-center"><span class="bg-emerald-900/40 text-emerald-500 text-xs px-2 py-1 rounded">Aktif</span></td>
-                            <td class="p-4 text-center">
-                                <button onclick="hapusUser('${user.id}', 'Hapus')" class="px-3 py-1 bg-rose-900/30 hover:bg-rose-600 text-rose-400 hover:text-white rounded transition text-xs font-bold">Hapus Akun</button>
+                            <td class="p-4 text-zinc-300 font-mono text-xs">${user.password || '******'}</td>
+                            <td class="p-4 text-center">${statusBadge}</td>
+                            <td class="p-4 text-center flex justify-center gap-1.5 flex-wrap">
+                                <button onclick="toggleLockUser('${user.id}', '${status}')" class="px-2.5 py-1 ${lockBtnClass} hover:text-white rounded transition text-xs font-bold">${lockBtnText}</button>
+                                <button onclick="resetPass('${user.id}')" class="px-2.5 py-1 bg-cyan-600/20 hover:bg-cyan-600 text-cyan-400 hover:text-white rounded transition text-xs font-bold">Reset Pass</button>
+                                <button onclick="hapusUser('${user.id}', 'Hapus')" class="px-2.5 py-1 bg-rose-900/30 hover:bg-rose-600 text-rose-400 hover:text-white rounded transition text-xs font-bold">Hapus</button>
                             </td>
                         </tr>
                     `;
@@ -796,7 +795,7 @@
             });
 
             if(pendingCount===0) pendingBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-zinc-500 italic">Tidak ada antrean pendaftaran.</td></tr>`;
-            if(activeCount===0) activeBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-zinc-500 italic">Belum ada user aktif.</td></tr>`;
+            if(activeCount===0) activeBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-zinc-500 italic">Belum ada user aktif.</td></tr>`;
 
             document.getElementById('statPending').innerText = pendingCount;
             document.getElementById('pendingBadge').innerText = pendingCount;
@@ -810,7 +809,30 @@
             } catch (error) {
                 alert("Gagal ACC: " + error.message);
             }
-        }
+        };
+
+        window.toggleLockUser = async function(id, currentStatus) {
+            try {
+                const newStatus = currentStatus === 'active' ? 'locked' : 'active';
+                const userRef = doc(db, "users", id);
+                await updateDoc(userRef, { status: newStatus });
+            } catch (error) {
+                alert("Gagal mengubah status akun: " + error.message);
+            }
+        };
+
+        window.resetPass = async function(id) {
+            const newPass = prompt("Masukkan password baru untuk user ini:");
+            if (newPass) {
+                try {
+                    const userRef = doc(db, "users", id);
+                    await updateDoc(userRef, { password: newPass });
+                    alert("Password berhasil diubah!");
+                } catch (error) {
+                    alert("Gagal mereset password: " + error.message);
+                }
+            }
+        };
 
         window.hapusUser = async function(id, actionName) {
             if(confirm(`Yakin ingin melakukan ${actionName} pada akun ini?`)) {
@@ -820,7 +842,7 @@
                     alert("Gagal menghapus: " + error.message);
                 }
             }
-        }
+        };
 
         function muatDataAksesLengkap() {
             cekAutoOffLangganan();
