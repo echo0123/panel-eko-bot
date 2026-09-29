@@ -98,6 +98,15 @@
                     return;
                 }
 
+                // SIMPAN SESI LOGIN KE LOCALSTORAGE (PENTING AGAR TIDAK STUCK DI HALAMAN LOGIN)
+                localStorage.setItem('current_user', JSON.stringify({
+                    name: userData.name,
+                    email: userData.email,
+                    customUiAllowed: userData.customUiAllowed || false,
+                    customUiExpiry: userData.customUiExpiry || null,
+                    jenisLayananAktif: userData.jenisLayananAktif || null
+                }));
+
                 // Jika aktif, masuk ke dashboard user
                 alertEl.style.display = "none";
                 alert("Login berhasil! Selamat datang, " + (userData.name || "Member"));
