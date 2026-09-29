@@ -3,85 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Akun | Panel Eko</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Pendaftaran Member - Panel Eko Bot</title>
     <style>
-        body {
-            background-color: #0f172a;
-            color: #e2e8f0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(6, 182, 212, 0.2);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1117; color: #c9d1d9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #161b22; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); width: 100%; max-width: 400px; border: 1px solid #30363d; }
+        h2 { text-align: center; color: #58a6ff; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 14px; }
+        input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 11px; background: #238636; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #2ea043; }
+        .msg { margin-top: 15px; text-align: center; font-size: 14px; }
     </style>
 </head>
-<body class="h-screen flex items-center justify-center p-4">
-
-    <div class="glass-card w-full max-w-md p-8 rounded-2xl relative overflow-hidden">
-        <div class="absolute -top-24 -right-24 w-48 h-48 bg-cyan-600 rounded-full filter blur-[60px] opacity-20 pointer-events-none"></div>
-
-        <div class="text-center mb-8">
-            <h2 class="text-2xl font-black text-white tracking-wider">REGISTRASI AKUN</h2>
-            <p class="text-xs text-cyan-400 mt-1 uppercase tracking-widest">Panel Eko User Portal</p>
-        </div>
-
-        <form id="registerForm" class="space-y-4">
-            <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Nama Lengkap</label>
-                <input type="text" id="regName" required class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-500 transition" placeholder="Cth: Eko Saputro">
+<body>
+    <div class="card">
+        <h2>Pendaftaran Member</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label>Nama Lengkap</label>
+                <input type="text" id="regName" required placeholder="Masukkan nama Anda">
             </div>
-            <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Email Aktif</label>
-                <input type="email" id="regEmail" required class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-500 transition" placeholder="nama@email.com">
+            <div class="form-group">
+                <label>Email Terdaftar</label>
+                <input type="email" id="regEmail" required placeholder="email@gmail.com">
             </div>
-            <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Password</label>
-                <input type="password" id="regPassword" required class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-500 transition" placeholder="••••••••">
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="regPassword" required placeholder="Minimal 6 karakter">
             </div>
-
-            <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3.5 rounded-lg transition shadow-[0_0_15px_rgba(6,182,212,0.4)] text-sm uppercase tracking-wider mt-2">
-                DAFTAR SEKARANG
-            </button>
+            <button type="submit">Daftar Sekarang</button>
         </form>
-
-        <div class="mt-6 text-center text-xs text-slate-400">
-            Sudah punya akun? <a href="login-user.html" class="text-cyan-400 hover:underline font-bold">Login di sini</a>
-        </div>
+        <div id="regMsg" class="msg"></div>
     </div>
 
-    <script>
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
+    <!-- Script Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB-40LEvhNDOT73mPYYxgIW7fJR4IMfqXU",
+            authDomain: "panelekodb.firebaseapp.com",
+            projectId: "panelekodb",
+            storageBucket: "panelekodb.firebasestorage.app",
+            messagingSenderId: "1047356348440",
+            appId: "1:1047356348440:web:804cbf2239f07ec8aa0b6d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('regName').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPassword').value;
+            const msgEl = document.getElementById('regMsg');
 
-            let users = JSON.parse(localStorage.getItem('db_users')) || [];
-
-            let existing = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-            if (existing) {
-                alert('Email ini sudah terdaftar! Silakan gunakan email lain atau langsung login.');
-                return;
+            try {
+                await addDoc(collection(db, "users"), {
+                    name: name,
+                    email: email,
+                    password: password,
+                    status: "pending",
+                    createdAt: new Date().toISOString()
+                });
+                msgEl.style.color = "#3fb950";
+                msgEl.innerHTML = "Pendaftaran berhasil! Akun Anda menunggu verifikasi Admin.";
+                document.getElementById('registerForm').reset();
+            } catch (error) {
+                msgEl.style.color = "#f85149";
+                msgEl.innerHTML = "Gagal mendaftar: " + error.message;
             }
-
-            users.push({
-                name: name,
-                email: email,
-                password: password,
-                status: 'pending',
-                isLocked: false, // Inisialisasi awal akun tidak terkunci
-                customUiAllowed: false,
-                customUiExpiry: null,
-                jenisLayananAktif: null
-            });
-
-            localStorage.setItem('db_users', JSON.stringify(users));
-            alert('Registrasi Berhasil! Akun Anda sedang menunggu persetujuan (ACC) dari Administrator.');
-            window.location.href = 'login-user.html';
         });
     </script>
 </body>

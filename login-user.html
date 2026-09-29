@@ -3,99 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Member | Panel Eko</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Member Login - Panel Eko Bot</title>
     <style>
-        body {
-            background-color: #0f172a;
-            color: #e2e8f0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(6, 182, 212, 0.2);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1117; color: #c9d1d9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #161b22; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); width: 100%; max-width: 400px; border: 1px solid #30363d; }
+        h2 { text-align: center; color: #58a6ff; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 14px; }
+        input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 11px; background: #1f6feb; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #388bfd; }
+        .alert { background: rgba(248, 81, 73, 0.1); border: 1px solid #f85149; color: #f85149; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 13px; text-align: center; display: none; }
     </style>
 </head>
-<body class="h-screen flex items-center justify-center p-4">
-
-    <div class="glass-card w-full max-w-md p-8 rounded-2xl relative overflow-hidden">
-        <div class="absolute -top-24 -right-24 w-48 h-48 bg-cyan-600 rounded-full filter blur-[60px] opacity-20 pointer-events-none"></div>
-
-        <div class="text-center mb-8">
-            <h2 class="text-2xl font-black text-white tracking-wider">MEMBER LOGIN</h2>
-            <p class="text-xs text-cyan-400 mt-1 uppercase tracking-widest">Panel Eko User Portal</p>
-        </div>
-
-        <!-- KOTAK NOTIFIKASI WARNING BERKEDIP (TERSEMBUNYI SECARA DEFAULT) -->
-        <div id="bannedNotification" class="hidden mb-5 p-4 bg-rose-950/90 border border-rose-500 rounded-xl flex items-center gap-3 animate-pulse shadow-[0_0_20px_rgba(244,63,94,0.4)]">
-            <div class="w-8 h-8 rounded-full bg-rose-600 flex items-center justify-center flex-shrink-0 animate-bounce">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                </svg>
+<body>
+    <div class="card">
+        <h2>MEMBER LOGIN</h2>
+        <div id="loginAlert" class="alert"></div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Email Terdaftar</label>
+                <input type="email" id="loginEmail" required placeholder="email@gmail.com">
             </div>
-            <p id="bannedText" class="text-xs font-bold text-rose-200 leading-relaxed uppercase tracking-wide"></p>
-        </div>
-
-        <form id="loginUserForm" class="space-y-5">
-            <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Email Terdaftar</label>
-                <input type="email" id="loginEmail" required class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-500 transition" placeholder="nama@email.com">
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" required placeholder="********">
             </div>
-            <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Password</label>
-                <input type="password" id="loginPassword" required class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-500 transition" placeholder="••••••••">
-            </div>
-
-            <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3.5 rounded-lg transition shadow-[0_0_15px_rgba(6,182,212,0.4)] text-sm uppercase tracking-wider mt-2">
-                MASUK KE PANEL
-            </button>
+            <button type="submit">Masuk ke Panel</button>
         </form>
-
-        <div class="mt-6 text-center text-xs text-slate-400">
-            Belum punya akun? <a href="register-user.html" class="text-cyan-400 hover:underline font-bold">Daftar di sini</a>
-        </div>
     </div>
 
-    <script>
-        document.getElementById('loginUserForm').addEventListener('submit', function(e) {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB-40LEvhNDOT73mPYYxgIW7fJR4IMfqXU",
+            authDomain: "panelekodb.firebaseapp.com",
+            projectId: "panelekodb",
+            storageBucket: "panelekodb.firebasestorage.app",
+            messagingSenderId: "1047356348440",
+            appId: "1:1047356348440:web:804cbf2239f07ec8aa0b6d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value.trim();
+            const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
+            const alertEl = document.getElementById('loginAlert');
 
-            let users = JSON.parse(localStorage.getItem('db_users')) || [];
-            let foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+            try {
+                const q = query(collection(db, "users"), where("email", "==", email));
+                const querySnapshot = await getDocs(q);
 
-            let notifBox = document.getElementById('bannedNotification');
-            let notifText = document.getElementById('bannedText');
+                if (querySnapshot.empty) {
+                    alertEl.style.display = "block";
+                    alertEl.innerHTML = "Email tidak ditemukan! Silakan daftar terlebih dahulu.";
+                    return;
+                }
 
-            if (!foundUser) {
-                notifBox.classList.remove('hidden');
-                notifText.innerText = "Email atau password salah, atau akun tidak ditemukan!";
-                return;
-            }
+                let userData = null;
+                querySnapshot.forEach((doc) => {
+                    userData = doc.data();
+                });
 
-            if (foundUser.status === 'pending') {
-                notifBox.classList.remove('hidden');
-                notifText.innerText = "Akun Anda masih dalam antrean verifikasi (Pending). Harap tunggu Administrator melakukan ACC.";
-                return;
-            }
+                if (userData.password !== password) {
+                    alertEl.style.display = "block";
+                    alertEl.innerHTML = "Password salah!";
+                    return;
+                }
 
-            // CEK KUNCI / BANNED OLEH ADMIN
-            if (foundUser.isLocked === true) {
-                notifBox.classList.remove('hidden');
-                notifText.innerText = "Maaf akun anda untuk saat ini di banned oleh sistem kami silahkan hubungi pusat layanan panel eko !";
-                return; // Mencegah proses login sepenuhnya
-            }
+                if (userData.status !== "active") {
+                    alertEl.style.display = "block";
+                    alertEl.innerHTML = "Akun Anda masih dalam antrean verifikasi (PENDING). Harap tunggu Administrator melakukan ACC.";
+                    return;
+                }
 
-            if (foundUser.status === 'active') {
-                localStorage.setItem('current_user', JSON.stringify(foundUser));
-                window.location.href = 'index.html';
-            } else {
-                notifBox.classList.remove('hidden');
-                notifText.innerText = "Akses akun ditolak atau diblokir oleh Administrator.";
+                alertEl.style.display = "none";
+                alert("Login berhasil! Selamat datang, " + userData.name);
+                // Redirect ke halaman panel user jika ada
+            } catch (error) {
+                alertEl.style.display = "block";
+                alertEl.innerHTML = "Terjadi kesalahan: " + error.message;
             }
         });
     </script>
