@@ -126,7 +126,7 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-xs font-medium text-slate-400 mb-1">Nama Lengkap</label>
-                            <input type="text" id="input-nama-profil" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-4 py-2 text-white text-sm">
+                            <input type="text" id="input-nama-profil" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-4 py-2 text-white text-sm" readonly>
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-400 mb-1">Email</label>
@@ -142,7 +142,7 @@
                     ← KEMBALI KE MENU PANEL
                 </button>
                 
-                <!-- Container Workspace Default (untuk panel umum) -->
+                <!-- Container Workspace Default -->
                 <div id="defaultWorkspaceContainer" class="glass-card rounded-lg p-8 flex flex-col items-center border border-cyan-500/30 min-h-[400px]">
                     <h3 id="workspace-title" class="text-2xl font-black text-white tracking-widest mb-3 uppercase text-center">NAMA PANEL</h3>
                     <p id="workspace-desc" class="text-sm text-slate-400 text-center max-w-xl mb-6">Deskripsi</p>
@@ -151,7 +151,7 @@
                     </div>
                 </div>
 
-                <!-- Container Bot Automation Engine (KHUSUS PANEL "daftar") -->
+                <!-- Container Bot Automation Engine (PANEL "daftar") -->
                 <div id="botControlContainer" class="glass-card rounded-lg p-8 space-y-6 border border-cyan-500/30" style="display: none;">
                     <div class="flex items-center justify-between border-b border-slate-700 pb-4">
                         <div>
@@ -234,16 +234,19 @@
     <script>
         window.onload = function() {
             let currentUser = JSON.parse(localStorage.getItem('current_user'));
-            if(!currentUser) { window.location.href = 'login-user.html'; return; }
+            if(!currentUser) { 
+                window.location.href = 'login-user.html'; 
+                return; 
+            }
 
             let users = JSON.parse(localStorage.getItem('db_users')) || [];
             let freshUser = users.find(u => u.email === currentUser.email) || currentUser;
 
-            document.getElementById('display-name-header').innerText = freshUser.name;
-            document.getElementById('input-nama-profil').value = freshUser.name;
-            document.getElementById('input-email-profil').value = freshUser.email;
+            document.getElementById('display-name-header').innerText = freshUser.name || 'User';
+            document.getElementById('input-nama-profil').value = freshUser.name || '';
+            document.getElementById('input-email-profil').value = freshUser.email || '';
             
-            let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(freshUser.name)}&background=06b6d4&color=fff`;
+            let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(freshUser.name || 'User')}&background=06b6d4&color=fff`;
             document.getElementById('header-avatar').src = avatarUrl;
             document.getElementById('preview-foto').src = avatarUrl + "&size=150";
 
@@ -257,7 +260,7 @@
             let container = document.getElementById('userMenuContainer');
             container.innerHTML = '';
 
-            let allowedMenus = menus.filter(menu => menu.allowedUsers.includes(userEmail));
+            let allowedMenus = menus.filter(menu => menu.allowedUsers && menu.allowedUsers.includes(userEmail));
             allowedMenus.sort((a, b) => a.name.localeCompare(b.name, undefined, {sensitivity: 'base'}));
 
             if(allowedMenus.length === 0) {
@@ -278,7 +281,6 @@
             });
         }
 
-        // FUNGSI MULTIPLE TAUTAN DI USER
         function tambahBarisTautan(titleVal = '', urlVal = '') {
             let container = document.getElementById('tautanContainer');
             let row = document.createElement('div');
@@ -365,21 +367,12 @@
 
             consoleLog.innerHTML += `<p class="text-cyan-400">[Bot] Memulai otomatisasi pendaftaran di: ${platform}</p>`;
             consoleLog.innerHTML += `<p class="text-slate-300">[Data] Akun: ${akun} | Total Tautan: ${tautanList.length} link</p>`;
-            
-            tautanList.forEach((item, idx) => {
-                consoleLog.innerHTML += `<p class="text-slate-400 ml-4"> -> [Link #${idx+1}] Title: "${item.title}" | URL: ${item.url}</p>`;
-            });
             consoleLog.scrollTop = consoleLog.scrollHeight;
 
             setTimeout(() => {
-                consoleLog.innerHTML += `<p class="text-yellow-400">[Network] Mengirimkan data registrasi ke server ${platform}...</p>`;
+                consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success] Pendaftaran BERHASIL! Tautan bio link telah di-publish otomatis.</p>`;
                 consoleLog.scrollTop = consoleLog.scrollHeight;
-            }, 1200);
-
-            setTimeout(() => {
-                consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success] Pendaftaran BERHASIL! ${tautanList.length} tautan bio link telah di-publish otomatis.</p>`;
-                consoleLog.scrollTop = consoleLog.scrollHeight;
-            }, 3000);
+            }, 2000);
         }
 
         function resetFormBotUser() {
@@ -543,7 +536,6 @@
             document.getElementById('section-workspace').classList.add('active');
             document.getElementById('header-title').innerText = 'WORKSPACE: ' + name.toUpperCase();
 
-            // Jika panel yang diklik adalah "daftar", tampilkan Bot Automation Engine
             if(name.toLowerCase() === 'daftar') {
                 document.getElementById('defaultWorkspaceContainer').style.display = 'none';
                 document.getElementById('botControlContainer').style.display = 'block';
