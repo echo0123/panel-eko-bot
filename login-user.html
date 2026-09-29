@@ -5,15 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Member Login - Panel Eko Bot</title>
     <style>
+        * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1117; color: #c9d1d9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: #161b22; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); width: 100%; max-width: 400px; border: 1px solid #30363d; }
-        h2 { text-align: center; color: #58a6ff; margin-bottom: 20px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-size: 14px; }
-        input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 11px; background: #1f6feb; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .card { background: #161b22; padding: 35px; border-radius: 12px; box-shadow: 0 4px 25px rgba(0,0,0,0.6); width: 100%; max-width: 400px; border: 1px solid #30363d; }
+        h2 { text-align: center; color: #58a6ff; margin-top: 0; margin-bottom: 20px; font-size: 22px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; font-size: 13px; color: #8b949e; font-weight: 600; }
+        input { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 6px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: #58a6ff; }
+        button { width: 100%; padding: 12px; background: #1f6feb; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
         button:hover { background: #388bfd; }
-        .alert { background: rgba(248, 81, 73, 0.1); border: 1px solid #f85149; color: #f85149; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 13px; text-align: center; display: none; }
+        .alert { background: rgba(248, 81, 73, 0.15); border: 1px solid #f85149; color: #f85149; padding: 12px; border-radius: 6px; margin-bottom: 18px; font-size: 13px; text-align: center; display: none; line-height: 1.4; }
+        .link-footer { text-align: center; margin-top: 20px; font-size: 13px; color: #8b949e; }
+        .link-footer a { color: #58a6ff; text-decoration: none; font-weight: 600; }
+        .link-footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -31,6 +36,9 @@
             </div>
             <button type="submit">Masuk ke Panel</button>
         </form>
+        <div class="link-footer">
+            Belum punya akun? <a href="register-user.html">Daftar di sini</a>
+        </div>
     </div>
 
     <script type="module">
@@ -51,7 +59,7 @@
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
+            const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
             const alertEl = document.getElementById('loginAlert');
 
@@ -72,22 +80,32 @@
 
                 if (userData.password !== password) {
                     alertEl.style.display = "block";
-                    alertEl.innerHTML = "Password salah!";
+                    alertEl.innerHTML = "Password yang Anda masukkan salah!";
                     return;
                 }
 
-                if (userData.status !== "active") {
+                // Cek status akun
+                const status = userData.status || "pending";
+                if (status === "pending") {
                     alertEl.style.display = "block";
-                    alertEl.innerHTML = "Akun Anda masih dalam antrean verifikasi (PENDING). Harap tunggu Administrator melakukan ACC.";
+                    alertEl.innerHTML = "⚠️ Akun Anda masih dalam antrean verifikasi (PENDING). Harap tunggu Administrator melakukan ACC.";
                     return;
                 }
 
+                if (status === "locked") {
+                    alertEl.style.display = "block";
+                    alertEl.innerHTML = "🚫 Akun Anda telah dikunci oleh Administrator.";
+                    return;
+                }
+
+                // Jika aktif, masuk ke dashboard user
                 alertEl.style.display = "none";
-                alert("Login berhasil! Selamat datang, " + userData.name);
-                // Redirect ke halaman panel user jika ada
+                alert("Login berhasil! Selamat datang, " + (userData.name || "Member"));
+                window.location.href = "dashboard-user.html";
+
             } catch (error) {
                 alertEl.style.display = "block";
-                alertEl.innerHTML = "Terjadi kesalahan: " + error.message;
+                alertEl.innerHTML = "Terjadi kesalahan sistem: " + error.message;
             }
         });
     </script>

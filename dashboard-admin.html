@@ -5,41 +5,160 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Panel Eko Bot</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1117; color: #c9d1d9; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; background: #161b22; padding: 25px; border-radius: 12px; border: 1px solid #30363d; }
-        h2 { color: #58a6ff; margin-top: 0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #30363d; font-size: 14px; }
-        th { background: #21262d; color: #f0f6fc; }
-        .btn-acc { background: #238636; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1117; color: #c9d1d9; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar */
+        .sidebar { width: 260px; background: #161b22; border-right: 1px solid #30363d; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #30363d; }
+        .sidebar-header img, .logo-icon { width: 35px; height: 35px; background: #1f6feb; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
+        .sidebar-header h3 { margin: 0; font-size: 16px; color: #f0f6fc; }
+        .sidebar-header span { font-size: 11px; color: #8b949e; }
+        
+        .menu-list { padding: 15px 10px; overflow-y: auto; flex: 1; }
+        .menu-category { font-size: 11px; text-transform: uppercase; color: #8b949e; margin: 15px 10px 8px; font-weight: bold; }
+        .menu-item { padding: 10px 12px; border-radius: 6px; cursor: pointer; margin-bottom: 4px; font-size: 14px; color: #c9d1d9; display: flex; justify-content: space-between; align-items: center; text-decoration: none; }
+        .menu-item:hover, .menu-item.active { background: #21262d; color: #58a6ff; }
+        .badge { background: #da3633; color: white; padding: 2px 6px; border-radius: 10px; font-size: 11px; }
+
+        /* Main Content */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; background: #0d1117; }
+        .top-navbar { padding: 15px 30px; background: #161b22; border-bottom: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center; }
+        .top-navbar h1 { margin: 0; font-size: 18px; color: #f0f6fc; }
+        .server-status { font-size: 13px; color: #8b949e; display: flex; align-items: center; gap: 8px; }
+        .status-dot { width: 8px; height: 8px; background: #3fb950; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #3fb950; }
+
+        .content-body { padding: 25px; }
+        
+        /* Stats Cards */
+        .stats-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
+        .stat-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px; border-top: 4px solid #58a6ff; }
+        .stat-card:nth-child(1) { border-top-color: #3fb950; }
+        .stat-card:nth-child(2) { border-top-color: #d29922; }
+        .stat-card:nth-child(3) { border-top-color: #8957e5; }
+        .stat-title { font-size: 13px; color: #8b949e; margin-bottom: 8px; }
+        .stat-value { font-size: 28px; font-weight: bold; color: #f0f6fc; }
+
+        /* Tables Card */
+        .card-section { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px; margin-bottom: 25px; }
+        .card-section h3 { margin-top: 0; color: #f0f6fc; font-size: 16px; margin-bottom: 15px; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #30363d; font-size: 13px; }
+        th { background: #21262d; color: #f0f6fc; font-weight: 600; }
+        
+        .status-pending { background: rgba(210, 153, 34, 0.15); color: #d29922; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+        .status-active { background: rgba(63, 185, 80, 0.15); color: #3fb950; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+        .status-locked { background: rgba(218, 54, 51, 0.15); color: #da3633; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+
+        /* Buttons */
+        .btn { padding: 5px 10px; border-radius: 4px; border: none; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .btn-acc { background: #238636; color: white; }
         .btn-acc:hover { background: #2ea043; }
-        .status-pending { color: #d29922; font-weight: bold; }
-        .status-active { color: #3fb950; font-weight: bold; }
+        .btn-lock { background: #9e6a03; color: white; }
+        .btn-lock:hover { background: #bb8009; }
+        .btn-reset { background: #1f6feb; color: white; }
+        .btn-reset:hover { background: #388bfd; }
+        .btn-delete { background: #da3633; color: white; }
+        .btn-delete:hover { background: #f85149; }
+        .btn-home { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: bold; }
+        .btn-home:hover { background: #30363d; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Command Center - Admin Dashboard</h2>
-        <p>Antrean verifikasi member baru secara real-time dari Firebase:</p>
-        
-        <table>
-            <thead>
-                <tr>
-                    <th>Nama Lengkap</th>
-                    <th>Email</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="adminTableBody">
-                <tr><td colspan="4" style="text-align: center;">Memuat data...</td></tr>
-            </tbody>
-        </table>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon">AF</div>
+            <div>
+                <h3>ADMIN</h3>
+                <span>ROOT ACCESS</span>
+            </div>
+        </div>
+        <div class="menu-list">
+            <div class="menu-category">Manajemen User</div>
+            <a href="#" class="menu-item active">Manajemen User <span class="badge" id="pendingBadge">0</span></a>
+            <a href="#" class="menu-item">Manajemen Akses & Layanan</a>
+            
+            <div class="menu-category">Keuangan & Sistem</div>
+            <a href="#" class="menu-item">Data Keuangan & Transaksi</a>
+            <a href="#" class="menu-item">Tema & Wallpaper Admin</a>
+        </div>
     </div>
 
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="top-navbar">
+            <h1>COMMAND CENTER</h1>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <a href="index.html" class="btn-home">← Kembali ke Beranda</a>
+                <div class="server-status">
+                    <span class="status-dot"></span> Server Status: <strong style="color: #3fb950;">ONLINE</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <!-- Statistik Cards -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-title">Total User Aktif</div>
+                    <div class="stat-value" id="totalActive">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Menunggu Verifikasi</div>
+                    <div class="stat-value" id="totalPending">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Total Master Panel</div>
+                    <div class="stat-value">3</div>
+                </div>
+            </div>
+
+            <!-- Bagian 1: Antrean Verifikasi User Baru -->
+            <div class="card-section">
+                <h3>Antrean Verifikasi User Baru</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>NAMA LENGKAP</th>
+                            <th>EMAIL</th>
+                            <th>STATUS</th>
+                            <th>AKSI</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingTableBody">
+                        <tr><td colspan="4" style="text-align: center; color: #8b949e;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Bagian 2: Daftar User Aktif -->
+            <div class="card-section">
+                <h3>Daftar User Aktif</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>NAMA LENGKAP</th>
+                            <th>EMAIL</th>
+                            <th>PASSWORD</th>
+                            <th>STATUS</th>
+                            <th>AKSI KONTROL</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activeTableBody">
+                        <tr><td colspan="5" style="text-align: center; color: #8b949e;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Firebase & Real-time Sync -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB-40LEvhNDOT73mPYYxgIW7fJR4IMfqXU",
@@ -53,41 +172,118 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Ambil data secara real-time
-        const tbody = document.getElementById('adminTableBody');
+        const pendingTableBody = document.getElementById('pendingTableBody');
+        const activeTableBody = document.getElementById('activeTableBody');
+        const totalActiveEl = document.getElementById('totalActive');
+        const totalPendingEl = document.getElementById('totalPending');
+        const pendingBadge = document.getElementById('pendingBadge');
+
+        // Mendengarkan perubahan data secara real-time dari Firebase
         onSnapshot(collection(db, "users"), (snapshot) => {
-            let rows = "";
-            let hasPending = false;
+            let pendingRows = "";
+            let activeRows = "";
+            let countPending = 0;
+            let countActive = 0;
 
             snapshot.forEach((docSnap) => {
                 const user = docSnap.data();
                 const id = docSnap.id;
+                const status = user.status || "pending";
 
-                if (user.status === "pending") {
-                    hasPending = true;
-                    rows += `<tr>
-                        <td>${user.name}</td>
-                        <td>${user.email}</td>
+                if (status === "pending") {
+                    countPending++;
+                    pendingRows += `<tr>
+                        <td>${user.name || '-'}</td>
+                        <td>${user.email || '-'}</td>
                         <td><span class="status-pending">PENDING</span></td>
-                        <td><button class="btn-acc" onclick="accUser('${id}')">ACC</button></td>
+                        <td><button class="btn btn-acc" onclick="accUser('${id}')">ACC</button></td>
+                    </tr>`;
+                } else {
+                    countActive++;
+                    const statusBadge = status === "active" 
+                        ? '<span class="status-active">Aktif</span>' 
+                        : '<span class="status-locked">Dikunci</span>';
+                    
+                    const lockButtonText = status === "active" ? "Kunci" : "Buka";
+
+                    activeRows += `<tr>
+                        <td>${user.name || '-'}</td>
+                        <td>${user.email || '-'}</td>
+                        <td>${user.password || '******'}</td>
+                        <td>${statusBadge}</td>
+                        <td style="display: flex; gap: 6px;">
+                            <button class="btn btn-lock" onclick="toggleLockUser('${id}', '${status}')">${lockButtonText}</button>
+                            <button class="btn btn-reset" onclick="resetPass('${id}')">Reset Pass</button>
+                            <button class="btn btn-delete" onclick="deleteUser('${id}')">Hapus</button>
+                        </td>
                     </tr>`;
                 }
             });
 
-            if (!hasPending) {
-                rows = `<tr><td colspan="4" style="text-align: center; color: #8b949e;">Tidak ada antrean pendaftaran saat ini.</td></tr>`;
+            // Update Statistik & Badge
+            totalActiveEl.innerText = countActive;
+            totalPendingEl.innerText = countPending;
+            pendingBadge.innerText = countPending;
+
+            // Update Tabel Antrean
+            if (countPending === 0) {
+                pendingTableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #8b949e;">Tidak ada antrean pendaftaran saat ini.</td></tr>`;
+            } else {
+                pendingTableBody.innerHTML = pendingRows;
             }
-            tbody.innerHTML = rows;
+
+            // Update Tabel User Aktif
+            if (countActive === 0) {
+                activeTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #8b949e;">Belum ada user aktif.</td></tr>`;
+            } else {
+                activeTableBody.innerHTML = activeRows;
+            }
         });
 
-        // Fungsi ACC Global
+        // Fungsi Tombol ACC
         window.accUser = async function(id) {
             try {
                 const userRef = doc(db, "users", id);
                 await updateDoc(userRef, { status: "active" });
-                alert("Berhasil melakukan ACC pada member!");
             } catch (error) {
                 alert("Gagal ACC: " + error.message);
+            }
+        };
+
+        // Fungsi Tombol Kunci / Buka Akun
+        window.toggleLockUser = async function(id, currentStatus) {
+            try {
+                const newStatus = currentStatus === "active" ? "locked" : "active";
+                const userRef = doc(db, "users", id);
+                await updateDoc(userRef, { status: newStatus });
+            } catch (error) {
+                alert("Gagal mengubah status: " + error.message);
+            }
+        };
+
+        // Fungsi Tombol Reset Password
+        window.resetPass = async function(id) {
+            const newPass = prompt("Masukkan password baru untuk user ini:");
+            if (newPass) {
+                try {
+                    const userRef = doc(db, "users", id);
+                    await updateDoc(userRef, { password: newPass });
+                    alert("Password berhasil diubah!");
+                } catch (error) {
+                    alert("Gagal mereset password: " + error.message);
+                }
+            }
+        };
+
+        // Fungsi Tombol Hapus User
+        window.deleteUser = async function(id) {
+            if (confirm("Yakin ingin menghapus user ini secara permanen?")) {
+                try {
+                    await deleteDoc(doc(db, "users", id));
+                    alert("User berhasil dihapus.");
+                } catch (error) {
+                    alert("Gagal menghapus user: " + error.message);
+                }
             }
         };
     </script>

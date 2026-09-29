@@ -5,15 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pendaftaran Member - Panel Eko Bot</title>
     <style>
+        * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1117; color: #c9d1d9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: #161b22; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); width: 100%; max-width: 400px; border: 1px solid #30363d; }
-        h2 { text-align: center; color: #58a6ff; margin-bottom: 20px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-size: 14px; }
-        input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 11px; background: #238636; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .card { background: #161b22; padding: 35px; border-radius: 12px; box-shadow: 0 4px 25px rgba(0,0,0,0.6); width: 100%; max-width: 400px; border: 1px solid #30363d; }
+        h2 { text-align: center; color: #58a6ff; margin-top: 0; margin-bottom: 20px; font-size: 22px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; font-size: 13px; color: #8b949e; font-weight: 600; }
+        input { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 6px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: #58a6ff; }
+        button { width: 100%; padding: 12px; background: #238636; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
         button:hover { background: #2ea043; }
-        .msg { margin-top: 15px; text-align: center; font-size: 14px; }
+        .msg { margin-top: 15px; text-align: center; font-size: 13px; }
+        .link-footer { text-align: center; margin-top: 20px; font-size: 13px; color: #8b949e; }
+        .link-footer a { color: #58a6ff; text-decoration: none; font-weight: 600; }
+        .link-footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -22,7 +27,7 @@
         <form id="registerForm">
             <div class="form-group">
                 <label>Nama Lengkap</label>
-                <input type="text" id="regName" required placeholder="Masukkan nama Anda">
+                <input type="text" id="regName" required placeholder="Masukkan nama lengkap">
             </div>
             <div class="form-group">
                 <label>Email Terdaftar</label>
@@ -35,12 +40,14 @@
             <button type="submit">Daftar Sekarang</button>
         </form>
         <div id="regMsg" class="msg"></div>
+        <div class="link-footer">
+            Sudah punya akun? <a href="login-user.html">Login di sini</a>
+        </div>
     </div>
 
-    <!-- Script Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB-40LEvhNDOT73mPYYxgIW7fJR4IMfqXU",
@@ -56,12 +63,22 @@
 
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('regName').value;
-            const email = document.getElementById('regEmail').value;
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value;
             const msgEl = document.getElementById('regMsg');
 
             try {
+                // Cek apakah email sudah terdaftar sebelumnya
+                const q = query(collection(db, "users"), where("email", "==", email));
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    msgEl.style.color = "#f85149";
+                    msgEl.innerHTML = "Email sudah terdaftar! Gunakan email lain atau silakan login.";
+                    return;
+                }
+
+                // Tambahkan user baru dengan status pending
                 await addDoc(collection(db, "users"), {
                     name: name,
                     email: email,
@@ -69,6 +86,7 @@
                     status: "pending",
                     createdAt: new Date().toISOString()
                 });
+
                 msgEl.style.color = "#3fb950";
                 msgEl.innerHTML = "Pendaftaran berhasil! Akun Anda menunggu verifikasi Admin.";
                 document.getElementById('registerForm').reset();
