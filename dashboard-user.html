@@ -83,7 +83,7 @@
             <h2 class="text-xl font-bold text-white tracking-wide" id="header-title">MENU PANEL</h2>
             <div class="flex items-center gap-3">
                 <span class="text-sm text-slate-400">Halo, <span id="display-name-header" class="text-white font-semibold">User</span></span>
-                <img id="header-avatar" src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff" class="w-8 h-8 rounded-full border border-cyan-500">
+                <img id="header-avatar" src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff" class="w-8 h-8 rounded-full border border-cyan-500 object-cover">
             </div>
         </header>
 
@@ -120,29 +120,40 @@
             <div id="section-profil" class="content-section">
                 <div class="glass-card max-w-xl mx-auto rounded-xl p-8 space-y-6">
                     <h3 class="text-xl font-bold text-white border-b border-slate-700 pb-4">Profil Saya</h3>
+                    
                     <div class="flex flex-col items-center space-y-4">
-                        <img id="preview-foto" src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff&size=150" alt="Foto" class="w-28 h-28 rounded-full object-cover border-4 border-slate-700">
+                        <div class="relative group">
+                            <img id="preview-foto" src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff&size=150" alt="Foto Profil" class="w-28 h-28 rounded-full object-cover border-4 border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.4)]">
+                            <label for="input-ganti-foto" class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center text-white text-xs font-bold opacity-0 group-hover:opacity-100 transition cursor-pointer">
+                                Ganti Foto
+                            </label>
+                            <input type="file" id="input-ganti-foto" accept="image/*" onchange="gantiFotoProfil(event)" class="hidden">
+                        </div>
+                        <p class="text-xs text-slate-400">Klik pada foto untuk mengganti gambar profil.</p>
                     </div>
+
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Nama Lengkap</label>
-                            <input type="text" id="input-nama-profil" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-4 py-2 text-white text-sm" readonly>
+                            <label class="block text-xs font-medium text-cyan-400 mb-1">Nama Lengkap</label>
+                            <input type="text" id="input-nama-profil" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500" placeholder="Nama Lengkap Anda">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Email</label>
-                            <input type="email" id="input-email-profil" disabled class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-slate-500 text-sm cursor-not-allowed">
+                            <label class="block text-xs font-medium text-cyan-400 mb-1">Email Terdaftar (Tidak dapat diubah)</label>
+                            <input type="email" id="input-email-profil" disabled class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-500 text-sm cursor-not-allowed">
                         </div>
+                        <button onclick="simpanPerubahanProfil()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg text-sm transition shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                            💾 SIMPAN PERUBAHAN PROFIL
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- SECTION 4: WORKSPACE (DENGAN BOT AUTOMATION ENGINE) -->
+            <!-- SECTION 4: WORKSPACE -->
             <div id="section-workspace" class="content-section">
                 <button onclick="switchTab('panel')" class="mb-6 flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition text-sm font-semibold">
                     ← KEMBALI KE MENU PANEL
                 </button>
                 
-                <!-- Container Workspace Default -->
                 <div id="defaultWorkspaceContainer" class="glass-card rounded-lg p-8 flex flex-col items-center border border-cyan-500/30 min-h-[400px]">
                     <h3 id="workspace-title" class="text-2xl font-black text-white tracking-widest mb-3 uppercase text-center">NAMA PANEL</h3>
                     <p id="workspace-desc" class="text-sm text-slate-400 text-center max-w-xl mb-6">Deskripsi</p>
@@ -151,7 +162,6 @@
                     </div>
                 </div>
 
-                <!-- Container Bot Automation Engine (PANEL "daftar") -->
                 <div id="botControlContainer" class="glass-card rounded-lg p-8 space-y-6 border border-cyan-500/30" style="display: none;">
                     <div class="flex items-center justify-between border-b border-slate-700 pb-4">
                         <div>
@@ -194,7 +204,6 @@
                             </div>
                         </div>
 
-                        <!-- CONTAINER MULTIPLE TAUTAN -->
                         <div class="space-y-3">
                             <label class="block text-xs font-bold text-cyan-400 uppercase tracking-widest">Daftar Title & URL Bio Link (Multiple Payload)</label>
                             <div id="tautanContainer" class="space-y-3 max-h-60 overflow-y-auto pr-2">
@@ -216,7 +225,6 @@
                             <button onclick="resetFormBotUser()" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-sm transition">Reset Form</button>
                         </div>
 
-                        <!-- TERMINAL KONSOL -->
                         <div class="mt-6">
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Terminal Log Aktivitas Bot (Termux Console)</label>
                             <div id="botConsoleLog" class="w-full h-48 bg-black/80 border border-slate-800 rounded p-4 font-mono text-xs text-emerald-400 overflow-y-auto space-y-1">
@@ -231,7 +239,23 @@
         </div>
     </main>
 
-    <script>
+    <!-- Firebase SDK & Script Integrasi -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB-40LEvhNDOT73mPYYxgIW7fJR4IMfqXU",
+            authDomain: "panelekodb.firebaseapp.com",
+            projectId: "panelekodb",
+            storageBucket: "panelekodb.firebasestorage.app",
+            messagingSenderId: "1047356348440",
+            appId: "1:1047356348440:web:804cbf2239f07ec8aa0b6d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
         window.onload = function() {
             let currentUser = JSON.parse(localStorage.getItem('current_user'));
             if(!currentUser) { 
@@ -239,21 +263,85 @@
                 return; 
             }
 
-            let users = JSON.parse(localStorage.getItem('db_users')) || [];
-            let freshUser = users.find(u => u.email === currentUser.email) || currentUser;
+            muatDataProfilUser(currentUser.email);
+            muatTemaTersimpan(currentUser.email);
+        }
 
-            document.getElementById('display-name-header').innerText = freshUser.name || currentUser.name || 'User';
-            document.getElementById('input-nama-profil').value = freshUser.name || currentUser.name || '';
-            document.getElementById('input-email-profil').value = freshUser.email || currentUser.email || '';
-            
-            let userName = freshUser.name || currentUser.name || 'User';
-            let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=06b6d4&color=fff`;
-            document.getElementById('header-avatar').src = avatarUrl;
-            document.getElementById('preview-foto').src = avatarUrl + "&size=150";
+        async function muatDataProfilUser(email) {
+            try {
+                const q = query(collection(db, "users"), where("email", "==", email));
+                const querySnapshot = await getDocs(q);
 
-            muatMenuUser(freshUser.email || currentUser.email);
-            muatStatusCustomUi(freshUser);
-            muatTemaTersimpan(freshUser.email || currentUser.email);
+                let userData = null;
+                let docId = null;
+                querySnapshot.forEach((d) => {
+                    userData = d.data();
+                    docId = d.id;
+                });
+
+                if(!userData) {
+                    userData = JSON.parse(localStorage.getItem('current_user'));
+                }
+
+                window.currentFirestoreDocId = docId;
+
+                document.getElementById('display-name-header').innerText = userData.name || 'User';
+                document.getElementById('input-nama-profil').value = userData.name || '';
+                document.getElementById('input-email-profil').value = userData.email || '';
+                
+                let savedFoto = localStorage.getItem('foto_profil_' + email);
+                let avatarUrl = savedFoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.name || 'User')}&background=06b6d4&color=fff`;
+                
+                document.getElementById('header-avatar').src = avatarUrl;
+                document.getElementById('preview-foto').src = avatarUrl;
+
+                muatMenuUser(email);
+                muatStatusCustomUi(userData);
+            } catch(e) {
+                console.error("Gagal memuat profil:", e);
+            }
+        }
+
+        window.gantiFotoProfil = function(event) {
+            const file = event.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    let base64Img = e.target.result;
+                    let currentUser = JSON.parse(localStorage.getItem('current_user'));
+                    localStorage.setItem('foto_profil_' + currentUser.email, base64Img);
+                    
+                    document.getElementById('preview-foto').src = base64Img;
+                    document.getElementById('header-avatar').src = base64Img;
+                    alert('Foto profil berhasil diperbarui!');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        window.simpanPerubahanProfil = async function() {
+            let newName = document.getElementById('input-nama-profil').value.trim();
+            let currentUser = JSON.parse(localStorage.getItem('current_user'));
+
+            if(!newName) {
+                alert('Nama lengkap tidak boleh kosong!');
+                return;
+            }
+
+            try {
+                if(window.currentFirestoreDocId) {
+                    const userRef = doc(db, "users", window.currentFirestoreDocId);
+                    await updateDoc(userRef, { name: newName });
+                }
+
+                currentUser.name = newName;
+                localStorage.setItem('current_user', JSON.stringify(currentUser));
+
+                document.getElementById('display-name-header').innerText = newName;
+                alert('Profil berhasil diperbarui dan disinkronkan ke server!');
+            } catch (error) {
+                alert('Gagal memperbarui profil: ' + error.message);
+            }
         }
 
         function muatMenuUser(userEmail) {
@@ -261,7 +349,6 @@
             let container = document.getElementById('userMenuContainer');
             container.innerHTML = '';
 
-            // Murni menyaring menu berdasarkan izin yang diberikan admin (allowedUsers)
             let allowedMenus = menus.filter(menu => menu.allowedUsers && menu.allowedUsers.includes(userEmail));
             allowedMenus.sort((a, b) => a.name.localeCompare(b.name, undefined, {sensitivity: 'base'}));
 
@@ -283,7 +370,7 @@
             });
         }
 
-        function tambahBarisTautan(titleVal = '', urlVal = '') {
+        window.tambahBarisTautan = function(titleVal = '', urlVal = '') {
             let container = document.getElementById('tautanContainer');
             let row = document.createElement('div');
             row.className = "flex gap-2 items-center tautan-row bg-slate-900/40 p-2 rounded border border-slate-800";
@@ -296,7 +383,7 @@
             updateCounterTautan();
         }
 
-        function hapusBarisTautan(btn) {
+        window.hapusBarisTautan = function(btn) {
             let rows = document.querySelectorAll('.tautan-row');
             if(rows.length > 1) {
                 btn.closest('.tautan-row').remove();
@@ -311,7 +398,7 @@
             document.getElementById('counterTautan').innerText = count;
         }
 
-        function simpanDataBotUser() {
+        window.simpanDataBotUser = function() {
             let currentUser = JSON.parse(localStorage.getItem('current_user'));
             let platform = document.getElementById('botTargetPlatform').value;
             let akun = document.getElementById('botAccountName').value;
@@ -349,10 +436,12 @@
             }
         }
 
-        function jalankanBotDaftarUser() {
+        // FETCH KE URL LOCALTUNNEL PUBLIK DI USER DASHBOARD
+        window.jalankanBotDaftarUser = function() {
             let platform = document.getElementById('botTargetPlatform').value;
             let akun = document.getElementById('botAccountName').value;
             let email = document.getElementById('botEmail').value;
+            let pass = document.getElementById('botPassword').value;
             let consoleLog = document.getElementById('botConsoleLog');
 
             let tautanList = [];
@@ -362,22 +451,31 @@
                 if(t && u) tautanList.push({ title: t, url: u });
             });
 
-            if(!akun || !email || tautanList.length === 0) {
-                alert('Harap lengkapi nama akun, email, dan minimal 1 pasang Title & URL yang valid!');
+            if(!akun || !email || !pass || tautanList.length === 0) {
+                alert('Harap lengkapi nama akun, email, password, dan minimal 1 pasang Title & URL yang valid!');
                 return;
             }
 
             consoleLog.innerHTML += `<p class="text-cyan-400">[Bot] Memulai otomatisasi pendaftaran di: ${platform}</p>`;
-            consoleLog.innerHTML += `<p class="text-slate-300">[Data] Akun: ${akun} | Total Tautan: ${tautanList.length} link</p>`;
             consoleLog.scrollTop = consoleLog.scrollHeight;
 
-            setTimeout(() => {
-                consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success] Pendaftaran BERHASIL! Tautan bio link telah di-publish otomatis.</p>`;
+            fetch('https://open-spoons-rhyme.loca.lt/run-bot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ platform, akun, email, password: pass, fillDirection: 'top-to-bottom', tautanList })
+            })
+            .then(response => response.json())
+            .then(data => {
+                consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success] Pendaftaran BERHASIL! Bot otomatis berjalan.</p>`;
                 consoleLog.scrollTop = consoleLog.scrollHeight;
-            }, 2000);
+            })
+            .catch(err => {
+                consoleLog.innerHTML += `<p class="text-rose-400">[Error] Gagal terhubung ke bot server via Localtunnel.</p>`;
+                consoleLog.scrollTop = consoleLog.scrollHeight;
+            });
         }
 
-        function resetFormBotUser() {
+        window.resetFormBotUser = function() {
             document.getElementById('botAccountName').value = '';
             document.getElementById('botEmail').value = '';
             document.getElementById('botPassword').value = '';
@@ -446,7 +544,7 @@
             }
         }
 
-        function terapkanTema(namaTema) {
+        window.terapkanTema = function(namaTema) {
             let root = document.documentElement;
             root.style.setProperty('--bg-image', 'none');
             if(namaTema === 'cyber') { root.style.setProperty('--bg-main', '#0f172a'); root.style.setProperty('--accent-color', '#06b6d4'); root.style.setProperty('--border-color', 'rgba(6, 182, 212, 0.2)'); }
@@ -461,7 +559,7 @@
             }
         }
 
-        function tambahWallpaperKeGaleri(event) {
+        window.tambahWallpaperKeGaleri = function(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
@@ -484,7 +582,7 @@
             }
         }
 
-        function pakaiWallpaperGaleri(imgSrc) {
+        window.pakaiWallpaperGaleri = function(imgSrc) {
             document.documentElement.style.setProperty('--bg-image', `url('${imgSrc}')`);
             let currentUser = JSON.parse(localStorage.getItem('current_user'));
             if(currentUser) {
@@ -493,7 +591,7 @@
             alert('Wallpaper berhasil dipasang!');
         }
 
-        function hapusWallpaperGaleri(index) {
+        window.hapusWallpaperGaleri = function(index) {
             if(confirm('Hapus wallpaper ini dari galeri penyimpanan akun Anda?')) {
                 let currentUser = JSON.parse(localStorage.getItem('current_user'));
                 let galleryKey = 'gallery_' + currentUser.email;
@@ -508,7 +606,7 @@
             }
         }
 
-        function resetWallpaper() {
+        window.resetWallpaper = function() {
             let currentUser = JSON.parse(localStorage.getItem('current_user'));
             if(currentUser) {
                 localStorage.removeItem('active_wallpaper_' + currentUser.email);
@@ -527,7 +625,7 @@
             }
         }
 
-        function switchTab(tabId) {
+        window.switchTab = function(tabId) {
             document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
             if(document.getElementById('nav-' + tabId)) document.getElementById('nav-' + tabId).classList.add('active');
@@ -537,7 +635,7 @@
             document.getElementById('header-title').innerText = titles[tabId] || 'PANEL EKO';
         }
 
-        function bukaWorkspacePanelUser(name, desc) {
+        window.bukaWorkspacePanelUser = function(name, desc) {
             document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
             document.getElementById('nav-panel').classList.add('active');
@@ -557,7 +655,7 @@
             }
         }
 
-        function logoutUser() {
+        window.logoutUser = function() {
             if(confirm('Keluar dari Panel Eko?')) {
                 localStorage.removeItem('current_user');
                 window.location.href = 'login-user.html';

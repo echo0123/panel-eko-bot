@@ -675,6 +675,7 @@
             }
         }
 
+        // FETCH KE URL LOACALTUNNEL PUBLIK
         window.jalankanBotDaftar = function() {
             let platform = document.getElementById('botTargetPlatform').value;
             let akun = document.getElementById('botAccountName').value;
@@ -698,7 +699,7 @@
             consoleLog.innerHTML += `<p class="text-cyan-400">[Bot] Mempersiapkan payload data untuk: ${platform} (Mode: ${fillDirection})</p>`;
             consoleLog.scrollTop = consoleLog.scrollHeight;
 
-            fetch('http://localhost:3000/run-bot', {
+            fetch('https://open-spoons-rhyme.loca.lt/run-bot', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ platform, akun, email, password: pass, fillDirection, tautanList })
@@ -709,7 +710,7 @@
                 consoleLog.scrollTop = consoleLog.scrollHeight;
             })
             .catch(err => {
-                consoleLog.innerHTML += `<p class="text-rose-400">[Error] Gagal terhubung ke server lokal.</p>`;
+                consoleLog.innerHTML += `<p class="text-rose-400">[Error] Gagal terhubung ke server lokal via Localtunnel.</p>`;
                 consoleLog.scrollTop = consoleLog.scrollHeight;
             });
         }
@@ -731,7 +732,6 @@
             document.getElementById('botConsoleLog').innerHTML = `<p class="text-zinc-500">[System] Form dibersihkan.</p>`;
         }
 
-        // SYNC REAL-TIME DARI FIRESTORE
         function setupFirebaseRealtimeSync() {
             onSnapshot(collection(db, "users"), (snapshot) => {
                 let users = [];
@@ -769,7 +769,6 @@
                         </tr>
                     `;
                 } else {
-                    // Mencakup status 'active' maupun 'locked'
                     activeCount++;
                     let statusBadge = status === 'active' 
                         ? '<span class="bg-emerald-900/40 text-emerald-500 text-xs px-2 py-1 rounded font-bold">Aktif</span>' 
@@ -1001,7 +1000,6 @@
             muatDataKeuangan();
         }
 
-        // TEMA & GALERI ADMIN
         window.terapkanTemaAdmin = function(namaTema) {
             let root = document.documentElement;
             root.style.setProperty('--bg-image', 'none');
