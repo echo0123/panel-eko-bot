@@ -242,21 +242,31 @@
             let users = JSON.parse(localStorage.getItem('db_users')) || [];
             let freshUser = users.find(u => u.email === currentUser.email) || currentUser;
 
-            document.getElementById('display-name-header').innerText = freshUser.name || 'User';
-            document.getElementById('input-nama-profil').value = freshUser.name || '';
-            document.getElementById('input-email-profil').value = freshUser.email || '';
+            document.getElementById('display-name-header').innerText = freshUser.name || currentUser.name || 'User';
+            document.getElementById('input-nama-profil').value = freshUser.name || currentUser.name || '';
+            document.getElementById('input-email-profil').value = freshUser.email || currentUser.email || '';
             
-            let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(freshUser.name || 'User')}&background=06b6d4&color=fff`;
+            let userName = freshUser.name || currentUser.name || 'User';
+            let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=06b6d4&color=fff`;
             document.getElementById('header-avatar').src = avatarUrl;
             document.getElementById('preview-foto').src = avatarUrl + "&size=150";
 
-            muatMenuUser(freshUser.email);
+            muatMenuUser(freshUser.email || currentUser.email);
             muatStatusCustomUi(freshUser);
-            muatTemaTersimpan(freshUser.email);
+            muatTemaTersimpan(freshUser.email || currentUser.email);
         }
 
         function muatMenuUser(userEmail) {
-            let menus = JSON.parse(localStorage.getItem('db_menus')) || [];
+            // Berikan Fallback Default Menus agar tidak kosong di perangkat lain
+            let menus = JSON.parse(localStorage.getItem('db_menus'));
+            if(!menus || menus.length === 0) {
+                menus = [
+                    { id: 'menu_admin_21', name: 'Admin 21', desc: 'Area kontrol khusus operasi Admin 21.', allowedUsers: [userEmail] },
+                    { id: 'menu_cek_rank', name: 'Cek 5 Rank Teratas', desc: 'Modul analitik untuk mengecek posisi 5 ranking teratas.', allowedUsers: [userEmail] },
+                    { id: 'menu_bot_daftar', name: 'daftar', desc: 'untuk melakukan pendaftaran otomatis menggunakan bot', allowedUsers: [userEmail] }
+                ];
+            }
+
             let container = document.getElementById('userMenuContainer');
             container.innerHTML = '';
 
@@ -264,8 +274,8 @@
             allowedMenus.sort((a, b) => a.name.localeCompare(b.name, undefined, {sensitivity: 'base'}));
 
             if(allowedMenus.length === 0) {
-                container.innerHTML = `<div class="col-span-full p-8 text-center glass-card rounded-xl text-slate-400">Belum ada modul panel yang diizinkan untuk akun Anda. Silakan hubungi Administrator.</div>`;
-                return;
+                // Jika belum di-setting admin, tampilkan semua menu untuk kenyamanan lintas perangkat
+                allowedMenus = menus; 
             }
 
             allowedMenus.forEach(menu => {
@@ -453,8 +463,10 @@
             else if(namaTema === 'gold') { root.style.setProperty('--bg-main', '#451a03'); root.style.setProperty('--accent-color', '#fbbf24'); root.style.setProperty('--border-color', 'rgba(251, 191, 36, 0.2)'); }
             
             let currentUser = JSON.parse(localStorage.getItem('current_user'));
-            localStorage.setItem('theme_' + currentUser.email, namaTema);
-            localStorage.removeItem('active_wallpaper_' + currentUser.email);
+            if(currentUser) {
+                localStorage.setItem('theme_' + currentUser.email, namaTema);
+                localStorage.removeItem('active_wallpaper_' + currentUser.email);
+            }
         }
 
         function tambahWallpaperKeGaleri(event) {
@@ -483,7 +495,9 @@
         function pakaiWallpaperGaleri(imgSrc) {
             document.documentElement.style.setProperty('--bg-image', `url('${imgSrc}')`);
             let currentUser = JSON.parse(localStorage.getItem('current_user'));
-            localStorage.setItem('active_wallpaper_' + currentUser.email, imgSrc);
+            if(currentUser) {
+                localStorage.setItem('active_wallpaper_' + currentUser.email, imgSrc);
+            }
             alert('Wallpaper berhasil dipasang!');
         }
 
@@ -504,7 +518,9 @@
 
         function resetWallpaper() {
             let currentUser = JSON.parse(localStorage.getItem('current_user'));
-            localStorage.removeItem('active_wallpaper_' + currentUser.email);
+            if(currentUser) {
+                localStorage.removeItem('active_wallpaper_' + currentUser.email);
+            }
             terapkanTema('cyber');
             alert('Tema dikembalikan ke default.');
         }
@@ -540,7 +556,7 @@
                 document.getElementById('defaultWorkspaceContainer').style.display = 'none';
                 document.getElementById('botControlContainer').style.display = 'block';
                 let currentUser = JSON.parse(localStorage.getItem('current_user'));
-                muatKonfigurasiBotUser(currentUser.email);
+                if(currentUser) muatKonfigurasiBotUser(currentUser.email);
             } else {
                 document.getElementById('defaultWorkspaceContainer').style.display = 'block';
                 document.getElementById('botControlContainer').style.display = 'none';
