@@ -257,25 +257,17 @@
         }
 
         function muatMenuUser(userEmail) {
-            // Berikan Fallback Default Menus agar tidak kosong di perangkat lain
-            let menus = JSON.parse(localStorage.getItem('db_menus'));
-            if(!menus || menus.length === 0) {
-                menus = [
-                    { id: 'menu_admin_21', name: 'Admin 21', desc: 'Area kontrol khusus operasi Admin 21.', allowedUsers: [userEmail] },
-                    { id: 'menu_cek_rank', name: 'Cek 5 Rank Teratas', desc: 'Modul analitik untuk mengecek posisi 5 ranking teratas.', allowedUsers: [userEmail] },
-                    { id: 'menu_bot_daftar', name: 'daftar', desc: 'untuk melakukan pendaftaran otomatis menggunakan bot', allowedUsers: [userEmail] }
-                ];
-            }
-
+            let menus = JSON.parse(localStorage.getItem('db_menus')) || [];
             let container = document.getElementById('userMenuContainer');
             container.innerHTML = '';
 
+            // Murni menyaring menu berdasarkan izin yang diberikan admin (allowedUsers)
             let allowedMenus = menus.filter(menu => menu.allowedUsers && menu.allowedUsers.includes(userEmail));
             allowedMenus.sort((a, b) => a.name.localeCompare(b.name, undefined, {sensitivity: 'base'}));
 
             if(allowedMenus.length === 0) {
-                // Jika belum di-setting admin, tampilkan semua menu untuk kenyamanan lintas perangkat
-                allowedMenus = menus; 
+                container.innerHTML = `<div class="col-span-full p-8 text-center glass-card rounded-xl text-slate-400">Belum ada modul panel yang diizinkan untuk akun Anda. Silakan hubungi Administrator.</div>`;
+                return;
             }
 
             allowedMenus.forEach(menu => {
