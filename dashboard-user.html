@@ -204,14 +204,6 @@
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-bold text-cyan-400 mb-1">Arah Urutan Pengisian Tautan (Title & URL)</label>
-                            <select id="botFillDirection" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
-                                <option value="top-to-bottom">Dari Atas ke Bawah (Urutan Normal)</option>
-                                <option value="bottom-to-top">Dari Bawah ke Atas (Urutan Dibalik)</option>
-                            </select>
-                        </div>
-
                         <div class="space-y-3">
                             <label class="block text-xs font-bold text-cyan-400 uppercase tracking-widest">Daftar Title & URL Bio Link (Multiple Payload)</label>
                             <div id="tautanContainer" class="space-y-3 max-h-60 overflow-y-auto pr-2">
@@ -412,7 +404,6 @@
             let akun = document.getElementById('botAccountName').value;
             let email = document.getElementById('botEmail').value;
             let pass = document.getElementById('botPassword').value;
-            let fillDirection = document.getElementById('botFillDirection').value;
             
             let tautanList = [];
             document.querySelectorAll('.tautan-row').forEach(row => {
@@ -421,7 +412,7 @@
                 if(t || u) tautanList.push({ title: t, url: u });
             });
 
-            let config = { platform, akun, email, pass, fillDirection, tautanList };
+            let config = { platform, akun, email, pass, tautanList };
             localStorage.setItem('bot_config_' + currentUser.email, JSON.stringify(config));
             alert('Konfigurasi Bot & Daftar Tautan Berhasil Disimpan di Akun Anda!');
         }
@@ -434,9 +425,6 @@
                 document.getElementById('botAccountName').value = config.akun || '';
                 document.getElementById('botEmail').value = config.email || '';
                 document.getElementById('botPassword').value = config.pass || '';
-                if(config.fillDirection) {
-                    document.getElementById('botFillDirection').value = config.fillDirection;
-                }
 
                 if(config.tautanList && config.tautanList.length > 0) {
                     let container = document.getElementById('tautanContainer');
@@ -448,12 +436,12 @@
             }
         }
 
+        // FETCH KE URL LOCALTUNNEL PUBLIK DI USER DASHBOARD
         window.jalankanBotDaftarUser = function() {
             let platform = document.getElementById('botTargetPlatform').value;
             let akun = document.getElementById('botAccountName').value;
             let email = document.getElementById('botEmail').value;
             let pass = document.getElementById('botPassword').value;
-            let fillDirection = document.getElementById('botFillDirection').value;
             let consoleLog = document.getElementById('botConsoleLog');
 
             let tautanList = [];
@@ -468,13 +456,13 @@
                 return;
             }
 
-            consoleLog.innerHTML += `<p class="text-cyan-400">[Bot] Memulai otomatisasi pendaftaran di: ${platform} (Mode: ${fillDirection})</p>`;
+            consoleLog.innerHTML += `<p class="text-cyan-400">[Bot] Memulai otomatisasi pendaftaran di: ${platform}</p>`;
             consoleLog.scrollTop = consoleLog.scrollHeight;
 
             fetch('https://open-spoons-rhyme.loca.lt/run-bot', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ platform, akun, email, password: pass, fillDirection, tautanList })
+                body: JSON.stringify({ platform, akun, email, password: pass, fillDirection: 'top-to-bottom', tautanList })
             })
             .then(response => response.json())
             .then(data => {
@@ -491,7 +479,6 @@
             document.getElementById('botAccountName').value = '';
             document.getElementById('botEmail').value = '';
             document.getElementById('botPassword').value = '';
-            document.getElementById('botFillDirection').value = 'top-to-bottom';
             document.getElementById('tautanContainer').innerHTML = `
                 <div class="flex gap-2 items-center tautan-row bg-slate-900/40 p-2 rounded border border-slate-800">
                     <input type="text" placeholder="Title (Cth: Official WhatsApp)" class="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-cyan-500 tautan-title">
