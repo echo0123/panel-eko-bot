@@ -165,7 +165,7 @@
                 </div>
             </div>
 
-            <!-- SECTION 3: TEMA & WALLPAPER USER (TERPROTEKSI BERDASARKAN IZIN ADMIN) -->
+            <!-- SECTION 3: TEMA & WALLPAPER USER -->
             <div id="section-tema" class="content-section">
                 <div class="glass-card max-w-3xl mx-auto rounded-xl p-8 space-y-8">
                     <h3 class="text-xl font-bold text-white border-b border-slate-700 pb-4">Pengaturan Tampilan Dashboard</h3>
@@ -180,12 +180,9 @@
                         </div>
                     </div>
 
-                    <!-- BAGIAN GALERI WALLPAPER KUSTOM (DIKUNCI JIKA ADMIN BELUM MEMBERI AKSES BERBAYAR) -->
                     <div class="space-y-4 pt-4 border-t border-slate-700">
                         <h4 class="text-sm font-bold text-cyan-400 uppercase tracking-widest">Galeri Wallpaper Kustom</h4>
-                        <div id="customWallpaperWrapper">
-                            <!-- Konten akan dirender dinamis via JS berdasarkan izin admin -->
-                        </div>
+                        <div id="customWallpaperWrapper"></div>
                     </div>
                 </div>
             </div>
@@ -296,15 +293,11 @@
             }
         });
 
-        // ==========================================
-        // RENDER KONTROL WALLPAPER KUSTOM (BERDASARKAN IZIN ADMIN)
-        // ==========================================
         function renderCustomWallpaperSection(user) {
             let container = document.getElementById('customWallpaperWrapper');
             if (!container) return;
 
             let sekarang = new Date().getTime();
-            // Cek apakah admin sudah mengaktifkan layanan berbayar dan belum kedaluwarsa
             let isActive = user.customUiAllowed && user.customUiExpiry && sekarang < user.customUiExpiry;
 
             if (isActive) {
@@ -471,7 +464,17 @@
                         </div>
 
                         <div class="space-y-3">
-                            <label class="block text-xs font-bold text-cyan-400 uppercase tracking-widest">Daftar Title & URL Bio Link</label>
+                            <div class="flex flex-wrap justify-between items-center gap-2">
+                                <label class="block text-xs font-bold text-cyan-400 uppercase tracking-widest">Daftar Title & URL Bio Link</label>
+                                <div class="flex items-center gap-2">
+                                    <label class="px-2.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs font-bold transition cursor-pointer">
+                                        📂 Upload File (.json)
+                                        <input type="file" id="userImportFilePreset" accept=".json" onchange="userImportPresetDariFile(event)" class="hidden">
+                                    </label>
+                                    <input type="text" id="userPresetNameInput" placeholder="Nama File" class="bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 w-28">
+                                    <button type="button" onclick="userSimpanPresetKeServer()" class="px-2.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs font-bold transition">Simpan ke Folder</button>
+                                </div>
+                            </div>
                             <div id="userTautanContainer" class="space-y-3 max-h-60 overflow-y-auto pr-2">
                                 <div class="flex gap-2 items-center user-tautan-row bg-slate-900/40 p-2 rounded border border-slate-800">
                                     <input type="text" placeholder="Title (Cth: Official WhatsApp)" class="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-cyan-500 user-tautan-title">
@@ -538,8 +541,75 @@
 
         function userUpdateCounterTautan() {
             let count = document.querySelectorAll('.user-tautan-row').length;
-            document.getElementById('userCounterTautan').innerText = count;
+            if(document.getElementById('userCounterTautan')) {
+                document.getElementById('userCounterTautan').innerText = count;
+            }
         }
+
+        // --- FITUR SIMPAN KE FOLDER PROJECT & UPLOAD FILE USER ---
+        window.userSimpanPresetKeServer = function() {
+            let presetName = document.getElementById('userPresetNameInput').value.trim();
+            if(!presetName) {
+                alert('Harap masukkan nama file terlebih dahulu!');
+                return;
+            }
+
+            let tautanList = [];
+            document.querySelectorAll('.user-tautan-row').forEach(row => {
+                let t = row.querySelector('.user-tautan-title').value;
+                let u = row.querySelector('.user-tautan-url').value;
+                if(t || u) tautanList.push({ title: t, url: u });
+            });
+
+            if(tautanList.length === 0) {
+                alert('Tidak ada data title & URL yang bisa disimpan!');
+                return;
+            }
+
+            fetch('http://localhost:3000/save-preset', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: presetName, data: tautanList })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if(result.success) {
+                    alert(`Berhasil! File tersimpan otomatis di dalam folder 'presets' di project kamu.`);
+                    document.getElementById('userPresetNameInput').value = '';
+                } else {
+                    alert('Gagal menyimpan: ' + result.message);
+                }
+            })
+            .catch(err => {
+                alert('Gagal terhubung ke server lokal. Pastikan server.js aktif.');
+            });
+        }
+
+        window.userImportPresetDariFile = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let tautanList = JSON.parse(e.target.result);
+                    if(Array.isArray(tautanList) && tautanList.length > 0) {
+                        let container = document.getElementById('userTautanContainer');
+                        container.innerHTML = '';
+                        tautanList.forEach(item => {
+                            userTambahBarisTautan(item.title, item.url);
+                        });
+                        alert(`File "${file.name}" berhasil di-upload dan dimuat ke form!`);
+                    } else {
+                        alert('Format file JSON tidak valid atau kosong.');
+                    }
+                } catch(err) {
+                    alert('Gagal membaca file: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+        // --------------------------------------------------------
 
         function userSimpanDataBot() {
             let platform = document.getElementById('userBotTargetPlatform').value;

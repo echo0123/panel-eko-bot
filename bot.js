@@ -1,5 +1,20 @@
 const puppeteer = require('puppeteer');
 
+let activeBrowsers = [];
+
+// Mendengarkan perintah tutup dari server untuk fitur Close All
+process.on('message', async (msg) => {
+    if (msg && msg.action === 'close') {
+        console.log('[System] Perintah Close All diterima. Menutup semua jendela browser...');
+        for (let browser of activeBrowsers) {
+            try {
+                await browser.close();
+            } catch (e) {}
+        }
+        process.exit(0);
+    }
+});
+
 (async () => {
     const rawData = process.argv[2];
     if (!rawData) {
@@ -16,7 +31,65 @@ const puppeteer = require('puppeteer');
     }
 
     // =========================================================================
-    // VALIDASI EKSKLUSIF: HANYA BERLAKU UNTUK PLATFORM MEZ.INK
+    // MODUL TAMBAHAN: ADMIN 21 AUTO LOGIN (HORIZONTAL FIT + PENCATAT BROWSER)
+    // =========================================================================
+    if (botData.task === 'admin-21') {
+        console.log('[System] Menjalankan Bot Auto Login Admin 21 (Screen-Fit Horizontal)...');
+        const accounts = botData.accounts || [];
+        const mode = botData.mode || 'simultaneous';
+
+        if (accounts.length === 0) {
+            console.error('[Error] Tidak ada akun Admin 21 yang dipilih!');
+            process.exit(1);
+        }
+
+        console.log(`[System] Membuka ${accounts.length} jendela tersusun menyamping agar pas di satu layar...`);
+
+        for (let i = 0; i < accounts.length; i++) {
+            const acc = accounts[i];
+            const windowWidth = 580;
+            const windowHeight = 980;
+            
+            // Jarak geser horizontal diatur agar 9 jendela muat sempurna dalam satu layar PC/laptop
+            const posX = i * 165; 
+            const posY = 0;
+
+            try {
+                const browser = await puppeteer.launch({
+                    headless: false,
+                    defaultViewport: null,
+                    executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+                    args: [
+                        `--window-size=${windowWidth},${windowHeight}`,
+                        `--window-position=${posX},${posY}`,
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox'
+                    ]
+                });
+                
+                // Catat instance browser agar bisa ditutup sekaligus via Close All
+                activeBrowsers.push(browser);
+
+                const page = await browser.newPage();
+                loginAdmin21(page, acc);
+
+                if (mode === 'sequential') {
+                    await new Promise(resolve => setTimeout(resolve, 2500));
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, 400));
+                }
+            } catch (err) {
+                console.error(`[Error Buka Jendela ${acc.username}]:`, err.message);
+            }
+        }
+
+        console.log('\n[Success] Seluruh 9 jendela Admin 21 berhasil dibuka dan pas di satu layar!');
+        await new Promise(() => {});
+        return;
+    }
+
+    // =========================================================================
+    // KODE ASLI 100% UTUH: VALIDASI EKSKLUSIF UNTUK PLATFORM MEZ.INK[cite: 1]
     // =========================================================================
     const targetPlatform = (botData.platform || '').toLowerCase();
     
@@ -44,6 +117,7 @@ const puppeteer = require('puppeteer');
             '--disable-setuid-sandbox'
         ]
     });
+    activeBrowsers.push(browser);
 
     try {
         const page = await browser.newPage();
@@ -252,3 +326,54 @@ const puppeteer = require('puppeteer');
     // Menjaga agar browser tetap terbuka stabil
     await new Promise(() => {});
 })();
+
+// Fungsi pendukung login otomatis Admin 21
+async function loginAdmin21(page, acc) {
+    try {
+        console.log(`[Network] Membuka ${acc.url} untuk akun: ${acc.username}`);
+        await page.goto(acc.url, { waitUntil: 'networkidle2', timeout: 30000 });
+
+        console.log(`[Bot] Mengetik Username: ${acc.username}`);
+        await page.waitForSelector('input[type="text"], input[name="username"], input[name="user"]', { timeout: 15000 });
+        
+        // Mengisi input username
+        await page.evaluate((uname) => {
+            let inputs = Array.from(document.querySelectorAll('input[type="text"], input[name="username"], input[name="user"], input:not([type])'));
+            if (inputs.length > 0) {
+                inputs[0].value = uname;
+                inputs[0].dispatchEvent(new Event('input', { bubbles: true }));
+                inputs[0].dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }, acc.username);
+
+        console.log('[Bot] Mengetik Password...');
+        await page.evaluate((pass) => {
+            let pInput = document.querySelector('input[type="password"]');
+            if (pInput) {
+                pInput.value = pass;
+                pInput.dispatchEvent(new Event('input', { bubbles: true }));
+                pInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }, acc.password);
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        console.log('[Bot] Mengklik tombol Login...');
+        await page.evaluate(() => {
+            let buttons = Array.from(document.querySelectorAll('button, input[type="submit"], button[type="submit"]'));
+            let btn = buttons.find(b => {
+                let text = (b.innerText || b.value || '').toLowerCase();
+                return text.includes('login') || text.includes('masuk') || text.includes('sign in') || b.type === 'submit';
+            });
+            if (btn) btn.click();
+            else {
+                let form = document.querySelector('form');
+                if (form) form.submit();
+            }
+        });
+
+        console.log(`[Success] Tab akun ${acc.username} berhasil diproses.`);
+    } catch (err) {
+        console.error(`[Error Login ${acc.username}]:`, err.message);
+    }
+}

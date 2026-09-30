@@ -171,23 +171,27 @@
                 </div>
             </div>
 
-            <!-- TAB 2: MANAJEMEN AKSES -->
+            <!-- TAB 2: MANAJEMEN AKSES & INSTALASI PLUGIN OTOMATIS -->
             <div id="section-akses" class="content-section">
                 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                     <div class="xl:col-span-1 space-y-6">
                         <div class="glass-card rounded-lg p-6">
-                            <h3 class="text-lg font-bold text-white mb-4 border-b border-zinc-800 pb-2">Buat Master Panel Baru</h3>
+                            <h3 class="text-lg font-bold text-white mb-4 border-b border-zinc-800 pb-2">Instal Plugin Otomatis (.js)</h3>
                             <form id="formTambahMenu" class="space-y-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-violet-400 mb-1">Nama Panel</label>
-                                    <input type="text" id="inputMenuName" required class="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-sm text-white focus:outline-none focus:border-violet-500" placeholder="Misal: Bot Telegram">
+                                    <label class="block text-xs font-bold text-violet-400 mb-1">Nama Panel / Plugin</label>
+                                    <input type="text" id="inputMenuName" required class="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-sm text-white focus:outline-none focus:border-violet-500" placeholder="Misal: Jowo Pools 4D">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-violet-400 mb-1">Deskripsi</label>
-                                    <textarea id="inputMenuDesc" required class="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-sm text-white focus:outline-none focus:border-violet-500 h-20" placeholder="Fungsi panel ini..."></textarea>
+                                    <textarea id="inputMenuDesc" required class="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-sm text-white focus:outline-none focus:border-violet-500 h-20" placeholder="Fungsi plugin ini..."></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-cyan-400 mb-1">Unggah File Skrip Plugin (.js)</label>
+                                    <input type="file" id="inputModuleFile" accept=".js" required class="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-white file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-500 cursor-pointer">
                                 </div>
                                 <button type="submit" class="w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-2.5 rounded transition text-sm shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-                                    + BUAT MASTER PANEL
+                                    + INSTAL PLUGIN OTOMATIS
                                 </button>
                             </form>
                         </div>
@@ -312,7 +316,7 @@
                 </div>
             </div>
 
-            <!-- TAB 5: WORKSPACE DINAMIS -->
+            <!-- TAB 5: WORKSPACE DINAMIS (TRUE PLUG-AND-PLAY CONTAINER) -->
             <div id="section-dynamic-workspace" class="content-section">
                 <div class="glass-card rounded-lg p-8 space-y-6 border border-violet-500/30">
                     <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
@@ -320,17 +324,16 @@
                             <h3 id="workspace-title" class="text-xl font-black text-white tracking-widest uppercase">NAMA PANEL</h3>
                             <p id="workspace-desc" class="text-xs text-zinc-400 mt-1">Deskripsi panel</p>
                         </div>
-                        <span class="px-3 py-1 bg-violet-900/40 border border-violet-700/50 text-violet-300 text-xs font-bold rounded-full">Bot Automation Engine</span>
+                        <span class="px-3 py-1 bg-violet-900/40 border border-violet-700/50 text-violet-300 text-xs font-bold rounded-full">Plugin Engine</span>
                     </div>
 
-                    <div id="botControlContainer" class="space-y-6">
+                    <!-- KONTROL WORKSPACE DAFTAR (MEZ.INK) -->
+                    <div id="botControlContainer" class="space-y-6" style="display:none;">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-violet-400 mb-1">Pilih Target Platform (List Link)</label>
                                 <select id="botTargetPlatform" class="w-full bg-zinc-900 border border-zinc-700 rounded p-2.5 text-sm text-white focus:outline-none focus:border-violet-500">
                                     <option value="https://mez.ink/">https://mez.ink/ (Aktif)</option>
-                                    <option value="https://joy.bio/">https://joy.bio/ (Antrean)</option>
-                                    <option value="https://www.linkbio.website/">https://www.linkbio.website/ (Antrean)</option>
                                 </select>
                             </div>
                             <div>
@@ -365,7 +368,16 @@
                         </div>
 
                         <div class="space-y-3">
-                            <label class="block text-xs font-bold text-violet-400 uppercase tracking-widest">Daftar Title & URL Bio Link (Multiple Payload)</label>
+                            <div class="flex flex-wrap justify-between items-center gap-2">
+                                <label class="block text-xs font-bold text-violet-400 uppercase tracking-widest">Daftar Title & URL Bio Link (Multiple Payload)</label>
+                                <div class="flex items-center gap-2">
+                                    <select id="presetDropdown" onchange="muatPresetDariServer()" class="bg-zinc-900 border border-zinc-700 rounded p-1.5 text-xs text-white focus:outline-none focus:border-violet-500">
+                                        <option value="">📁 Pilih File Tersimpan...</option>
+                                    </select>
+                                    <input type="text" id="presetNameInput" placeholder="Nama File" class="bg-zinc-900 border border-zinc-700 rounded p-1.5 text-xs text-white focus:outline-none focus:border-violet-500 w-28">
+                                    <button type="button" onclick="simpanPresetKeServer()" class="px-2.5 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded text-xs font-bold transition">Simpan ke Folder</button>
+                                </div>
+                            </div>
                             <div id="tautanContainer" class="space-y-3 max-h-60 overflow-y-auto pr-2">
                                 <div class="flex gap-2 items-center tautan-row bg-zinc-900/40 p-2 rounded border border-zinc-800">
                                     <input type="text" placeholder="Title (Cth: Official WhatsApp)" class="flex-1 bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-white focus:outline-none focus:border-violet-500 tautan-title">
@@ -392,6 +404,50 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- KONTROL WORKSPACE ADMIN 21 -->
+                    <div id="admin21ControlContainer" class="space-y-6" style="display:none;">
+                        <div class="flex flex-wrap justify-between items-center gap-4 bg-zinc-900/60 p-4 rounded-lg border border-zinc-800">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-bold text-violet-400 uppercase">Mode Buka Jendela:</span>
+                                <select id="admin21Mode" class="bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-white focus:outline-none focus:border-violet-500">
+                                    <option value="simultaneous">Buka Sekaligus (9 Jendela Bersamaan)</option>
+                                    <option value="sequential">Buka Satu Persatu (Berurutan dengan Jeda)</option>
+                                </select>
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="button" onclick="pilihSemuaAdmin21(true)" class="px-3 py-1.5 bg-violet-600/30 hover:bg-violet-600 text-violet-300 hover:text-white rounded text-xs transition border border-violet-700 font-bold">Pilih Semua</button>
+                                <button type="button" onclick="pilihSemuaAdmin21(false)" class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded text-xs transition">Batalkan Pilihan</button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="block text-xs font-bold text-violet-400 uppercase tracking-widest">Daftar Akun Admin 21 (Dewaplay)</label>
+                            <div id="admin21AccountsContainer" class="space-y-2 max-h-72 overflow-y-auto pr-2"></div>
+                        </div>
+
+                        <div class="pt-2 flex flex-wrap gap-3">
+                            <button onclick="jalankanAdmin21Bot()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded text-sm transition shadow-[0_0_15px_rgba(16,185,129,0.3)] flex items-center gap-2">
+                                🚀 JALANKAN AUTO LOGIN ADMIN 21
+                            </button>
+                            <button onclick="tutupSemuaAdmin21()" class="px-6 py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded text-sm transition shadow-[0_0_15px_rgba(244,63,94,0.3)] flex items-center gap-2">
+                                🔴 CLOSE ALL (TUTUP SEMUA)
+                            </button>
+                        </div>
+
+                        <div class="mt-6">
+                            <label class="block text-xs font-bold text-zinc-400 uppercase mb-2">Terminal Log Admin 21</label>
+                            <div id="admin21ConsoleLog" class="w-full h-48 bg-black/80 border border-zinc-800 rounded p-4 font-mono text-xs text-emerald-400 overflow-y-auto space-y-1">
+                                <p class="text-zinc-500">[System] Modul Admin 21 siap. Silakan pilih akun dan jalankan auto login.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KONTROL WORKSPACE PLUGIN KUSTOM (OTOMATIS MERENDER UI DARI FILE .JS PLUGIN) -->
+                    <div id="customModuleControlContainer" class="space-y-6" style="display:none;">
+                        <!-- UI Plugin akan disuntikkan secara otomatis ke sini -->
+                    </div>
+
                 </div>
             </div>
 
@@ -518,6 +574,20 @@
         let halamanAktif = 1;
         const barisPerHalaman = 100;
         let firebaseUsersCache = [];
+        let activePluginScript = '';
+
+        // Data 9 Akun Admin 21 (Hanya Nama Brand)
+        const listAkunAdmin21 = [
+            { url: 'http://ag.dewaplay.xyz/', name: 'Megahoki', username: 'abmhaaToto143', password: 'qwe123' },
+            { url: 'http://ag.dewaplay.xyz/', name: 'Areaslot', username: 'abasaaToto143', password: 'qwe123' },
+            { url: 'http://ag.dewaplay.xyz/', name: 'Powernet', username: 'abpwaaToto143', password: 'qwe123' },
+            { url: 'http://ag.dewaplay.xyz/', name: 'Koinslot', username: 'abksaaToto143', password: 'qwe123' },
+            { url: 'http://ag.dewaplay.xyz/', name: 'Kingjr', username: 'abkjaaToto143', password: 'qwe123' },
+            { url: 'http://ag.dewaplay.xyz/', name: 'Holyslot', username: 'abhsaaToto143', password: 'qwe123' },
+            { url: 'http://ag.dewaplay.xyz/', name: 'Indogg', username: 'abioaaToto143', password: 'qwe123' },
+            { url: 'http://ag.dewaplay.xyz/', name: 'Dragonslot', username: 'abdsaaToto143', password: 'qwe123' },
+            { url: 'http://ag.dewaplay.xyz/', name: 'Citislots', username: 'abcsaaToto143', password: 'qwe123' }
+        ];
 
         function initDatabase() {
             let menus = JSON.parse(localStorage.getItem('db_menus'));
@@ -588,23 +658,185 @@
             if(tabId === 'tema') renderAdminGallery();
         }
 
-        window.bukaWorkspacePanel = function(id, name, desc) {
+        // --- TRUE PLUG-AND-PLAY WORKSPACE RENDERER ---
+        window.bukaWorkspacePanel = function(id, name, desc, script = '') {
             document.querySelectorAll('.admin-nav-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
-            document.getElementById('nav-' + id).classList.add('active');
+            
+            let navEl = document.getElementById('nav-' + id);
+            if(navEl) navEl.classList.add('active');
+            
             document.getElementById('nav-panel-all').classList.add('active');
             document.getElementById('section-dynamic-workspace').classList.add('active');
             document.getElementById('header-title').innerText = 'WORKSPACE: ' + name.toUpperCase();
             document.getElementById('workspace-title').innerText = name.toUpperCase();
             document.getElementById('workspace-desc').innerText = desc;
 
+            const botContainer = document.getElementById('botControlContainer');
+            const admin21Container = document.getElementById('admin21ControlContainer');
+            const customContainer = document.getElementById('customModuleControlContainer');
+
             if(name.toLowerCase() === 'daftar') {
-                document.getElementById('botControlContainer').style.display = 'block';
+                botContainer.style.display = 'block';
+                admin21Container.style.display = 'none';
+                customContainer.style.display = 'none';
                 muatKonfigurasiBotTersimpan();
+                ambilDaftarPreset();
+            } else if(name.toLowerCase() === 'admin 21') {
+                botContainer.style.display = 'none';
+                admin21Container.style.display = 'block';
+                customContainer.style.display = 'none';
+                renderTabelAdmin21();
             } else {
-                document.getElementById('botControlContainer').style.display = 'none';
+                botContainer.style.display = 'none';
+                admin21Container.style.display = 'none';
+                customContainer.style.display = 'block';
+                
+                activePluginScript = script || '';
+
+                // Otomatis mengambil UI dan skrip interaktif dari file .js plugin
+                if (script) {
+                    fetch(`http://localhost:3000/get-plugin-ui/${script}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                customContainer.innerHTML = data.uiHtml;
+                                if (data.clientScript) {
+                                    let funcBody = data.clientScript.match(/\{([\s\S]*)\}/);
+                                    if (funcBody && funcBody[1]) {
+                                        let dynamicFunc = new Function(funcBody[1]);
+                                        dynamicFunc();
+                                    }
+                                }
+                            } else {
+                                customContainer.innerHTML = `<p class="text-rose-400 p-4">Gagal memuat UI plugin: ${data.message}</p>`;
+                            }
+                        })
+                        .catch(err => {
+                            customContainer.innerHTML = `<p class="text-rose-400 p-4">Gagal terhubung ke server untuk memuat plugin UI.</p>`;
+                        });
+                } else {
+                    customContainer.innerHTML = `<p class="text-zinc-500 p-4">Tidak ada file skrip .js yang terikat pada panel ini.</p>`;
+                }
             }
         }
+
+        // --- RENDER & KONTROL ADMIN 21 ---
+        function renderTabelAdmin21() {
+            let container = document.getElementById('admin21AccountsContainer');
+            container.innerHTML = '';
+            listAkunAdmin21.forEach((acc, index) => {
+                container.innerHTML += `
+                    <label class="flex items-center gap-3 p-3 bg-zinc-900/60 rounded border border-zinc-800 hover:border-violet-500/50 cursor-pointer transition">
+                        <input type="checkbox" value="${index}" checked class="admin21-checkbox w-4 h-4 text-violet-600 rounded bg-zinc-900 border-zinc-700">
+                        <span class="text-xs font-bold text-white">${acc.name}</span>
+                    </label>
+                `;
+            });
+        }
+
+        window.pilihSemuaAdmin21 = function(status) {
+            document.querySelectorAll('.admin21-checkbox').forEach(cb => cb.checked = status);
+        }
+
+        window.jalankanAdmin21Bot = function() {
+            let selectedIndexes = Array.from(document.querySelectorAll('.admin21-checkbox:checked')).map(cb => parseInt(cb.value));
+            let mode = document.getElementById('admin21Mode').value;
+            let consoleLog = document.getElementById('admin21ConsoleLog');
+
+            if(selectedIndexes.length === 0) {
+                alert('Pilih minimal 1 akun untuk dijalankan!');
+                return;
+            }
+
+            let selectedAccounts = selectedIndexes.map(i => listAkunAdmin21[i]);
+
+            consoleLog.innerHTML += `<p class="text-cyan-400">[Admin 21] Menjalankan bot untuk ${selectedAccounts.length} akun (Mode: ${mode})...</p>`;
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+
+            fetch('http://localhost:3000/run-bot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ task: 'admin-21', mode: mode, accounts: selectedAccounts })
+            })
+            .then(res => res.json())
+            .then(data => {
+                consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success] Browser otomatis terbuka & memproses login!</p>`;
+                consoleLog.scrollTop = consoleLog.scrollHeight;
+            })
+            .catch(err => {
+                consoleLog.innerHTML += `<p class="text-rose-400">[Error] Gagal terhubung ke server lokal. Pastikan server.js aktif.</p>`;
+                consoleLog.scrollTop = consoleLog.scrollHeight;
+            });
+        }
+
+        window.tutupSemuaAdmin21 = function() {
+            let consoleLog = document.getElementById('admin21ConsoleLog');
+            consoleLog.innerHTML += `<p class="text-rose-400">[System] Mengirim perintah menutup seluruh jendela browser Admin 21...</p>`;
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+
+            fetch('http://localhost:3000/close-admin-21', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success] Semua jendela berhasil ditutup.</p>`;
+                consoleLog.scrollTop = consoleLog.scrollHeight;
+            })
+            .catch(err => {
+                consoleLog.innerHTML += `<p class="text-rose-400">[Error] Gagal terhubung ke server lokal.</p>`;
+                consoleLog.scrollTop = consoleLog.scrollHeight;
+            });
+        }
+        // ---------------------------------
+
+        // --- FORM INSTALASI PLUGIN OTOMATIS (AUTO-REGISTRATION) ---
+        document.getElementById('formTambahMenu').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('inputMenuName').value.trim();
+            const desc = document.getElementById('inputMenuDesc').value.trim();
+            const fileInput = document.getElementById('inputModuleFile');
+            
+            if(fileInput.files.length === 0) {
+                alert('Harap pilih file skrip plugin (.js) terlebih dahulu!');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                const scriptCode = event.target.result;
+                const filename = file.name;
+
+                fetch('http://localhost:3000/install-module', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename, code: scriptCode, name, desc })
+                })
+                .then(res => res.json())
+                .then(result => {
+                    if(result.success && result.pluginInfo) {
+                        let menus = JSON.parse(localStorage.getItem('db_menus')) || [];
+                        menus.push(result.pluginInfo);
+                        localStorage.setItem('db_menus', JSON.stringify(menus));
+                        
+                        document.getElementById('formTambahMenu').reset();
+                        muatDataAksesLengkap();
+                        alert(`Plugin "${name}" berhasil diinstal dan terdaftar otomatis di sidebar!`);
+                    } else {
+                        alert('Gagal menginstal plugin: ' + result.message);
+                    }
+                })
+                .catch(err => {
+                    alert('Gagal terhubung ke server lokal.');
+                });
+            };
+
+            reader.readAsText(file);
+        });
+        // ---------------------------------
 
         window.tambahBarisTautan = function(titleVal = '', urlVal = '') {
             let container = document.getElementById('tautanContainer');
@@ -632,6 +864,83 @@
         function updateCounterTautan() {
             let count = document.querySelectorAll('.tautan-row').length;
             document.getElementById('counterTautan').innerText = count;
+        }
+
+        function ambilDaftarPreset() {
+            fetch('http://localhost:3000/get-presets')
+            .then(res => res.json())
+            .then(result => {
+                if(result.success) {
+                    let dropdown = document.getElementById('presetDropdown');
+                    if(!dropdown) return;
+                    dropdown.innerHTML = `<option value="">📁 Pilih File Tersimpan...</option>`;
+                    result.files.forEach(file => {
+                        let displayName = file.replace('.json', '');
+                        dropdown.innerHTML += `<option value="${file}">${displayName}</option>`;
+                    });
+                }
+            })
+            .catch(err => {});
+        }
+
+        window.muatPresetDariServer = function() {
+            let filename = document.getElementById('presetDropdown').value;
+            if(!filename) return;
+
+            fetch(`http://localhost:3000/load-preset/${filename}`)
+            .then(res => res.json())
+            .then(result => {
+                if(result.success && Array.isArray(result.data)) {
+                    let container = document.getElementById('tautanContainer');
+                    container.innerHTML = '';
+                    result.data.forEach(item => {
+                        tambahBarisTautan(item.title, item.url);
+                    });
+                    alert(`File preset "${filename.replace('.json','')}" berhasil dimuat!`);
+                }
+            })
+            .catch(err => {
+                alert('Gagal memuat file preset dari server.');
+            });
+        }
+
+        window.simpanPresetKeServer = function() {
+            let presetName = document.getElementById('presetNameInput').value.trim();
+            if(!presetName) {
+                alert('Harap masukkan nama file terlebih dahulu!');
+                return;
+            }
+
+            let tautanList = [];
+            document.querySelectorAll('.tautan-row').forEach(row => {
+                let t = row.querySelector('.tautan-title').value;
+                let u = row.querySelector('.tautan-url').value;
+                if(t || u) tautanList.push({ title: t, url: u });
+            });
+
+            if(tautanList.length === 0) {
+                alert('Tidak ada data title & URL yang bisa disimpan!');
+                return;
+            }
+
+            fetch('http://localhost:3000/save-preset', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: presetName, data: tautanList })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if(result.success) {
+                    alert(`Berhasil! File tersimpan ke folder 'presets'.`);
+                    document.getElementById('presetNameInput').value = '';
+                    ambilDaftarPreset();
+                } else {
+                    alert('Gagal menyimpan: ' + result.message);
+                }
+            })
+            .catch(err => {
+                alert('Gagal terhubung ke server lokal. Pastikan server.js aktif.');
+            });
         }
 
         window.simpanDataBot = function() {
@@ -675,7 +984,6 @@
             }
         }
 
-        // FETCH KE URL LOACALTUNNEL PUBLIK
         window.jalankanBotDaftar = function() {
             let platform = document.getElementById('botTargetPlatform').value;
             let akun = document.getElementById('botAccountName').value;
@@ -699,7 +1007,7 @@
             consoleLog.innerHTML += `<p class="text-cyan-400">[Bot] Mempersiapkan payload data untuk: ${platform} (Mode: ${fillDirection})</p>`;
             consoleLog.scrollTop = consoleLog.scrollHeight;
 
-            fetch('https://open-spoons-rhyme.loca.lt/run-bot', {
+            fetch('http://localhost:3000/run-bot', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ platform, akun, email, password: pass, fillDirection, tautanList })
@@ -710,7 +1018,7 @@
                 consoleLog.scrollTop = consoleLog.scrollHeight;
             })
             .catch(err => {
-                consoleLog.innerHTML += `<p class="text-rose-400">[Error] Gagal terhubung ke server lokal via Localtunnel.</p>`;
+                consoleLog.innerHTML += `<p class="text-rose-400">[Error] Gagal terhubung ke server lokal. Pastikan server.js aktif.</p>`;
                 consoleLog.scrollTop = consoleLog.scrollHeight;
             });
         }
@@ -858,17 +1166,20 @@
 
             menus.forEach(menu => {
                 subMenuListContainer.innerHTML += `
-                    <button id="nav-${menu.id}" onclick="bukaWorkspacePanel('${menu.id}', '${menu.name}', '${menu.desc}')" class="sub-menu-item admin-nav-btn w-full text-left px-4 py-2 hover:bg-zinc-800/50 text-zinc-400 text-sm transition rounded flex items-center gap-2">
+                    <button id="nav-${menu.id}" onclick="bukaWorkspacePanel('${menu.id}', '${menu.name}', '${menu.desc}', '${menu.script || ''}')" class="sub-menu-item admin-nav-btn w-full text-left px-4 py-2 hover:bg-zinc-800/50 text-zinc-400 text-sm transition rounded flex items-center gap-2">
                         <span class="w-1.5 h-1.5 rounded-full bg-violet-500"></span> ${menu.name}
                     </button>
                 `;
                 
+                let scriptInfo = menu.script ? `<span class="text-[10px] text-cyan-400 font-mono block mt-1">📁 Skrip: ${menu.script}</span>` : '';
+
                 masterPanelList.innerHTML += `
                     <div class="flex flex-col p-3 bg-zinc-900/50 border border-zinc-800 rounded gap-2 hover:border-violet-500/50 transition">
                         <div class="flex justify-between items-start">
                             <div class="flex-1 pr-2">
                                 <span class="text-sm text-white font-bold block mb-1">${menu.name}</span>
                                 <span class="text-xs text-zinc-500 block leading-relaxed line-clamp-2">${menu.desc}</span>
+                                ${scriptInfo}
                             </div>
                             <div class="flex flex-col gap-1.5">
                                 <button onclick="bukaModalEdit('${menu.id}')" class="text-cyan-400 hover:text-cyan-300 text-[10px] font-bold bg-cyan-900/20 hover:bg-cyan-900/40 px-3 py-1.5 rounded transition">Edit</button>
@@ -918,7 +1229,7 @@
                                 <p class="text-[10px] text-zinc-500">${user.email || '-'}</p>
                             </td>
                             <td class="p-4 flex flex-wrap gap-1 max-w-xs">${badges}</td>
-                            <td class="p-4 text-center">${customUiStatus}</td>
+                            <td class="p-4 text-center"><span class="bg-zinc-800 text-zinc-500 text-[10px] px-2 py-1 rounded">Aktif</span></td>
                             <td class="p-4 text-right space-x-1 whitespace-nowrap">
                                 <button onclick="bukaModalAksesUser('${user.email}', '${user.name}')" class="px-3 py-1.5 bg-violet-600/20 hover:bg-violet-600 text-violet-400 hover:text-white rounded text-xs font-bold transition">Atur Panel</button>
                                 ${toggleCustomUiBtn}
@@ -1181,21 +1492,6 @@
                 }
             }
         }
-
-        document.getElementById('formTambahMenu').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('inputMenuName').value;
-            const desc = document.getElementById('inputMenuDesc').value;
-            let menus = JSON.parse(localStorage.getItem('db_menus')) || [];
-            let newId = 'menu_' + Date.now();
-            menus.push({ id: newId, name: name, desc: desc, allowedUsers: [] });
-            localStorage.setItem('db_menus', JSON.stringify(menus));
-            this.reset();
-            muatDataAksesLengkap();
-            document.getElementById('submenu-panel-all').classList.remove('hidden');
-            document.getElementById('submenu-panel-all').classList.add('flex');
-            document.getElementById('icon-panel-all').classList.add('rotate-180');
-        });
 
         window.bukaModalEdit = function(id) {
             let menus = JSON.parse(localStorage.getItem('db_menus')) || [];
