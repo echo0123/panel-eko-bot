@@ -47,6 +47,32 @@
         .content-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* Animasi Neon Switch Mode */
+        @keyframes neonBlink {
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.9)); }
+            50% { opacity: 0.4; filter: drop-shadow(0 0 2px rgba(139, 92, 246, 0.2)); }
+        }
+        @keyframes signalPulse {
+            0% { transform: scaleY(0.5); opacity: 0.5; filter: drop-shadow(0 0 4px rgba(6, 182, 212, 0.6)); }
+            50% { transform: scaleY(1.3); opacity: 1; filter: drop-shadow(0 0 12px rgba(6, 182, 212, 1)); }
+            100% { transform: scaleY(0.5); opacity: 0.5; filter: drop-shadow(0 0 4px rgba(6, 182, 212, 1)); }
+        }
+        .neon-bulb-anim { animation: neonBlink 1.2s infinite ease-in-out; display: inline-block; }
+        .neon-signal-anim { animation: signalPulse 0.8s infinite ease-in-out; display: inline-block; }
+        
+        .mode-btn-active-local {
+            background-color: rgba(139, 92, 246, 0.25) !important;
+            border-color: #8b5cf6 !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+        }
+        .mode-btn-active-public {
+            background-color: rgba(6, 182, 212, 0.25) !important;
+            border-color: #06b6d4 !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 1);
+        }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -95,8 +121,27 @@
             </div>
         </nav>
 
-        <div class="p-4 border-t border-zinc-800">
-            <button onclick="logoutAdmin()" class="w-full px-4 py-2 bg-zinc-800 hover:bg-rose-900/50 text-zinc-300 hover:text-rose-400 border border-zinc-700 transition rounded text-sm font-bold tracking-wider">
+        <!-- AREA SWITCH MODE (Ditempatkan di area kotak merah sebelum tombol Logout) -->
+        <div class="p-4 border-t border-zinc-800 space-y-3">
+            <div class="text-[10px] font-bold text-violet-400 uppercase tracking-widest text-center">Mode Switch</div>
+            
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="setPanelMode('local')" id="btnModeLocal" class="flex flex-col items-center justify-center p-2 rounded border transition-all bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-violet-500">
+                    <span class="text-base mb-0.5 neon-bulb-anim">💡</span>
+                    <span class="text-[9px] font-bold tracking-wider">LOCAL</span>
+                </button>
+                <button onclick="setPanelMode('public')" id="btnModePublic" class="flex flex-col items-center justify-center p-2 rounded border transition-all bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-cyan-500">
+                    <span class="text-base mb-0.5 neon-signal-anim">📶</span>
+                    <span class="text-[9px] font-bold tracking-wider">PUBLIC</span>
+                </button>
+            </div>
+
+            <div id="publicUrlGroup" class="hidden space-y-1.5 pt-1">
+                <input type="text" id="inputPublicUrl" placeholder="https://xxxx.loca.lt" class="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-[11px] text-white focus:outline-none focus:border-cyan-500">
+                <button onclick="savePublicUrlAdmin()" class="w-full py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-[10px] font-bold transition">Simpan URL</button>
+            </div>
+
+            <button onclick="logoutAdmin()" class="w-full px-4 py-2 bg-zinc-800 hover:bg-rose-900/50 text-zinc-300 hover:text-rose-400 border border-zinc-700 transition rounded text-sm font-bold tracking-wider mt-2">
                 LOGOUT
             </button>
         </div>
@@ -316,7 +361,7 @@
                 </div>
             </div>
 
-            <!-- TAB 5: WORKSPACE DINAMIS (TRUE PLUG-AND-PLAY CONTAINER) -->
+            <!-- TAB 5: WORKSPACE DINAMIS -->
             <div id="section-dynamic-workspace" class="content-section">
                 <div class="glass-card rounded-lg p-8 space-y-6 border border-violet-500/30">
                     <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
@@ -443,10 +488,8 @@
                         </div>
                     </div>
 
-                    <!-- KONTROL WORKSPACE PLUGIN KUSTOM (OTOMATIS MERENDER UI DARI FILE .JS PLUGIN) -->
-                    <div id="customModuleControlContainer" class="space-y-6" style="display:none;">
-                        <!-- UI Plugin akan disuntikkan secara otomatis ke sini -->
-                    </div>
+                    <!-- KONTROL WORKSPACE PLUGIN KUSTOM -->
+                    <div id="customModuleControlContainer" class="space-y-6" style="display:none;"></div>
 
                 </div>
             </div>
@@ -528,7 +571,6 @@
         </div>
     </div>
 
-    <!-- MODAL EDIT & UPDATE PLUGIN MASTER PANEL -->
     <div id="modalEditPanel" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 items-center justify-center hidden">
         <div class="glass-card w-full max-w-md rounded-lg overflow-hidden border border-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.3)]">
             <div class="p-5 border-b border-zinc-800 flex justify-between items-center bg-zinc-900">
@@ -582,7 +624,58 @@
         let firebaseUsersCache = [];
         let activePluginScript = '';
 
-        // Data 9 Akun Admin 21 (Hanya Nama Brand)
+        // --- FUNGSI PENGATUR SWITCH MODE URL DINAMIS ---
+        window.getBackendUrl = function() {
+            let mode = localStorage.getItem('panel_connection_mode') || 'local';
+            if (mode === 'public') {
+                return localStorage.getItem('panel_public_url') || 'http://localhost:3000';
+            }
+            return 'http://localhost:3000';
+        };
+
+        window.setPanelMode = function(mode) {
+            localStorage.setItem('panel_connection_mode', mode);
+            if (mode === 'public') {
+                let currentUrl = prompt("Masukkan URL Publik / Tunnel (Contoh: https://xxxx.loca.lt):", localStorage.getItem('panel_public_url') || '');
+                if (currentUrl !== null) {
+                    localStorage.setItem('panel_public_url', currentUrl.trim());
+                } else {
+                    return;
+                }
+            }
+            updateModeUI();
+        };
+
+        window.savePublicUrlAdmin = function() {
+            let url = document.getElementById('inputPublicUrl').value.trim();
+            if (!url) { alert('URL tidak boleh kosong!'); return; }
+            localStorage.setItem('panel_public_url', url);
+            localStorage.setItem('panel_connection_mode', 'public');
+            updateModeUI();
+            alert('URL Public berhasil disimpan dan diaktifkan!');
+        };
+
+        window.updateModeUI = function() {
+            let mode = localStorage.getItem('panel_connection_mode') || 'local';
+            let btnLocal = document.getElementById('btnModeLocal');
+            let btnPublic = document.getElementById('btnModePublic');
+            let publicGroup = document.getElementById('publicUrlGroup');
+            let inputUrl = document.getElementById('inputPublicUrl');
+
+            if (inputUrl) inputUrl.value = localStorage.getItem('panel_public_url') || '';
+
+            if (mode === 'public') {
+                if(btnPublic) btnPublic.className = "flex flex-col items-center justify-center p-2 rounded border transition-all mode-btn-active-public";
+                if(btnLocal) btnLocal.className = "flex flex-col items-center justify-center p-2 rounded border transition-all bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-violet-500";
+                if(publicGroup) publicGroup.classList.remove('hidden');
+            } else {
+                if(btnLocal) btnLocal.className = "flex flex-col items-center justify-center p-2 rounded border transition-all mode-btn-active-local";
+                if(btnPublic) btnPublic.className = "flex flex-col items-center justify-center p-2 rounded border transition-all bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-cyan-500";
+                if(publicGroup) publicGroup.classList.add('hidden');
+            }
+        };
+
+        // Data 9 Akun Admin 21
         const listAkunAdmin21 = [
             { url: 'http://ag.dewaplay.xyz/', name: 'Megahoki', username: 'abmhaaToto143', password: 'qwe123' },
             { url: 'http://ag.dewaplay.xyz/', name: 'Areaslot', username: 'abasaaToto143', password: 'qwe123' },
@@ -597,14 +690,10 @@
 
         function initDatabase() {
             let menus = JSON.parse(localStorage.getItem('db_menus')) || [];
-            
-            // Daftar default yang bersih (hanya menu sistem utama)
             const defaultMenus = [
                 { id: 'menu_admin_21', name: 'Admin 21', desc: 'Area kontrol khusus operasi Admin 21.', allowedUsers: [] },
                 { id: 'menu_bot_daftar', name: 'daftar', desc: 'untuk melakukan pendaftaran otomatis menggunakan bot', allowedUsers: [] }
             ];
-
-            // BARIS FILTER PENGHAPUS OTOMATIS TELAH DIHAPUS AGAR PLUGIN TIDAK HILANG SAAT REFRESH
 
             if(menus.length === 0) {
                 menus = defaultMenus;
@@ -615,8 +704,6 @@
                     }
                 });
             }
-            
-            // Simpan menu ke localStorage tanpa menghapus plugin kustom
             localStorage.setItem('db_menus', JSON.stringify(menus));
         }
 
@@ -666,7 +753,6 @@
             if(tabId === 'tema') renderAdminGallery();
         }
 
-        // --- TRUE PLUG-AND-PLAY WORKSPACE RENDERER ---
         window.bukaWorkspacePanel = function(id, name, desc, script = '') {
             document.querySelectorAll('.admin-nav-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
@@ -702,9 +788,8 @@
                 
                 activePluginScript = script || '';
 
-                // Otomatis mengambil UI dan skrip interaktif dari file .js plugin
                 if (script) {
-                    fetch(`http://localhost:3000/get-plugin-ui/${script}`)
+                    fetch(`${getBackendUrl()}/get-plugin-ui/${script}`)
                         .then(res => res.json())
                         .then(data => {
                             if (data.success) {
@@ -729,7 +814,6 @@
             }
         }
 
-        // --- RENDER & KONTROL ADMIN 21 ---
         function renderTabelAdmin21() {
             let container = document.getElementById('admin21AccountsContainer');
             container.innerHTML = '';
@@ -762,7 +846,7 @@
             consoleLog.innerHTML += `<p class="text-cyan-400">[Admin 21] Menjalankan bot untuk ${selectedAccounts.length} akun (Mode: ${mode})...</p>`;
             consoleLog.scrollTop = consoleLog.scrollHeight;
 
-            fetch('http://localhost:3000/run-bot', {
+            fetch(`${getBackendUrl()}/run-bot`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ task: 'admin-21', mode: mode, accounts: selectedAccounts })
@@ -773,7 +857,7 @@
                 consoleLog.scrollTop = consoleLog.scrollHeight;
             })
             .catch(err => {
-                consoleLog.innerHTML += `<p class="text-rose-400">[Error] Gagal terhubung ke server lokal. Pastikan server.js aktif.</p>`;
+                consoleLog.innerHTML += `<p class="text-rose-400">[Error] Gagal terhubung ke server. Pastikan server aktif/URL Publik benar.</p>`;
                 consoleLog.scrollTop = consoleLog.scrollHeight;
             });
         }
@@ -783,7 +867,7 @@
             consoleLog.innerHTML += `<p class="text-rose-400">[System] Mengirim perintah menutup seluruh jendela browser Admin 21...</p>`;
             consoleLog.scrollTop = consoleLog.scrollHeight;
 
-            fetch('http://localhost:3000/close-admin-21', {
+            fetch(`${getBackendUrl()}/close-admin-21`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }
             })
@@ -793,13 +877,11 @@
                 consoleLog.scrollTop = consoleLog.scrollHeight;
             })
             .catch(err => {
-                consoleLog.innerHTML += `<p class="text-rose-400">[Error] Gagal terhubung ke server lokal.</p>`;
+                consoleLog.innerHTML += `<p class="text-rose-400">[Error] Gagal terhubung ke server.</p>`;
                 consoleLog.scrollTop = consoleLog.scrollHeight;
             });
         }
-        // ---------------------------------
 
-        // --- FORM INSTALASI PLUGIN OTOMATIS (AUTO-REGISTRATION) ---
         document.getElementById('formTambahMenu').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('inputMenuName').value.trim();
@@ -818,7 +900,7 @@
                 const scriptCode = event.target.result;
                 const filename = file.name;
 
-                fetch('http://localhost:3000/install-module', {
+                fetch(`${getBackendUrl()}/install-module`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ filename, code: scriptCode, name, desc })
@@ -838,13 +920,12 @@
                     }
                 })
                 .catch(err => {
-                    alert('Gagal terhubung ke server lokal.');
+                    alert('Gagal terhubung ke server.');
                 });
             };
 
             reader.readAsText(file);
         });
-        // ---------------------------------
 
         window.tambahBarisTautan = function(titleVal = '', urlVal = '') {
             let container = document.getElementById('tautanContainer');
@@ -875,7 +956,7 @@
         }
 
         function ambilDaftarPreset() {
-            fetch('http://localhost:3000/get-presets')
+            fetch(`${getBackendUrl()}/get-presets`)
             .then(res => res.json())
             .then(result => {
                 if(result.success) {
@@ -895,7 +976,7 @@
             let filename = document.getElementById('presetDropdown').value;
             if(!filename) return;
 
-            fetch(`http://localhost:3000/load-preset/${filename}`)
+            fetch(`${getBackendUrl()}/load-preset/${filename}`)
             .then(res => res.json())
             .then(result => {
                 if(result.success && Array.isArray(result.data)) {
@@ -931,7 +1012,7 @@
                 return;
             }
 
-            fetch('http://localhost:3000/save-preset', {
+            fetch(`${getBackendUrl()}/save-preset`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: presetName, data: tautanList })
@@ -947,7 +1028,7 @@
                 }
             })
             .catch(err => {
-                alert('Gagal terhubung ke server lokal. Pastikan server.js aktif.');
+                alert('Gagal terhubung ke server.');
             });
         }
 
@@ -1015,7 +1096,7 @@
             consoleLog.innerHTML += `<p class="text-cyan-400">[Bot] Mempersiapkan payload data untuk: ${platform} (Mode: ${fillDirection})</p>`;
             consoleLog.scrollTop = consoleLog.scrollHeight;
 
-            fetch('http://localhost:3000/run-bot', {
+            fetch(`${getBackendUrl()}/run-bot`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ platform, akun, email, password: pass, fillDirection, tautanList })
@@ -1026,7 +1107,7 @@
                 consoleLog.scrollTop = consoleLog.scrollHeight;
             })
             .catch(err => {
-                consoleLog.innerHTML += `<p class="text-rose-400">[Error] Gagal terhubung ke server lokal. Pastikan server.js aktif.</p>`;
+                consoleLog.innerHTML += `<p class="text-rose-400">[Error] Gagal terhubung ke server.</p>`;
                 consoleLog.scrollTop = consoleLog.scrollHeight;
             });
         }
@@ -1212,21 +1293,10 @@
                     let badges = accessibleMenus.map(m => `<span class="bg-violet-900/40 text-violet-400 border border-violet-700/50 text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap">${m.name}</span>`).join(' ');
                     if(badges === '') badges = `<span class="text-xs text-zinc-600 italic">Belum ada panel.</span>`;
 
-                    let customUiStatus = '';
                     let toggleCustomUiBtn = '';
-
                     if(user.customUiAllowed && user.customUiExpiry) {
-                        let tglExp = new Date(user.customUiExpiry).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'});
-                        customUiStatus = `
-                            <div class="flex flex-col items-center">
-                                <span class="bg-emerald-900/40 text-emerald-400 border border-emerald-700 text-[10px] px-2 py-0.5 rounded font-bold">AKTIF</span>
-                                <span class="text-[10px] text-violet-300 font-semibold mt-0.5">${user.jenisLayananAktif || 'Layanan Berbayar'}</span>
-                                <span class="text-[10px] text-zinc-400">Exp: ${tglExp}</span>
-                            </div>
-                        `;
                         toggleCustomUiBtn = `<button onclick="cabutCustomUi('${user.email}')" class="px-2.5 py-1.5 bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white rounded text-[10px] font-bold transition">Cabut</button>`;
                     } else {
-                        customUiStatus = `<span class="bg-zinc-800 text-zinc-500 text-[10px] px-2 py-1 rounded">Terkunci (Free)</span>`;
                         toggleCustomUiBtn = `<button onclick="bukaModalCustomUi('${user.email}')" class="px-2.5 py-1.5 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white rounded text-[10px] font-bold transition">Beri Layanan</button>`;
                     }
 
@@ -1519,7 +1589,6 @@
             document.getElementById('modalEditPanel').classList.remove('flex');
         }
 
-        // FITUR UPDATE PLUGIN / SKRIP .JS TERINTEGRASI DALAM MODAL EDIT
         window.simpanEditPanel = function(e) {
             e.preventDefault();
             let id = document.getElementById('editPanelId').value;
@@ -1533,7 +1602,6 @@
                 menus[index].name = newName; 
                 menus[index].desc = newDesc;
 
-                // Jika admin menyertakan file .js baru saat melakukan edit
                 if(fileInput && fileInput.files.length > 0) {
                     const file = fileInput.files[0];
                     const reader = new FileReader();
@@ -1542,7 +1610,7 @@
                         const scriptCode = event.target.result;
                         const filename = file.name;
 
-                        fetch('http://localhost:3000/install-module', {
+                        fetch(`${getBackendUrl()}/install-module`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ filename, code: scriptCode, name: newName, desc: newDesc })
@@ -1560,12 +1628,11 @@
                             }
                         })
                         .catch(err => {
-                            alert('Gagal terhubung ke server lokal saat memperbarui skrip.');
+                            alert('Gagal terhubung ke server.');
                         });
                     };
                     reader.readAsText(file);
                 } else {
-                    // Jika hanya mengubah teks nama/deskripsi tanpa mengganti file .js
                     localStorage.setItem('db_menus', JSON.stringify(menus));
                     tutupModalEdit(); 
                     muatDataAksesLengkap();
@@ -1624,6 +1691,7 @@
             setupFirebaseRealtimeSync();
             muatDataAksesLengkap();
             muatTemaAdminTersimpan();
+            updateModeUI();
         };
     </script>
 </body>
