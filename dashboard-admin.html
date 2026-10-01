@@ -528,10 +528,11 @@
         </div>
     </div>
 
+    <!-- MODAL EDIT & UPDATE PLUGIN MASTER PANEL -->
     <div id="modalEditPanel" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 items-center justify-center hidden">
         <div class="glass-card w-full max-w-md rounded-lg overflow-hidden border border-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.3)]">
             <div class="p-5 border-b border-zinc-800 flex justify-between items-center bg-zinc-900">
-                <h3 class="text-lg font-bold text-white">Edit Master Panel</h3>
+                <h3 class="text-lg font-bold text-white">Edit & Update Master Panel</h3>
                 <button onclick="tutupModalEdit()" class="text-zinc-400 hover:text-white">&times;</button>
             </div>
             <form id="formEditPanel" onsubmit="simpanEditPanel(event)">
@@ -544,6 +545,11 @@
                     <div>
                         <label class="block text-xs font-bold text-cyan-400 mb-1">Deskripsi Panel</label>
                         <textarea id="editPanelDesc" required class="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-sm text-white focus:outline-none focus:border-cyan-500 h-24"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-emerald-400 mb-1">Update File Skrip Baru (.js) - <span class="text-zinc-400 font-normal">Opsional</span></label>
+                        <input type="file" id="editModuleFile" accept=".js" class="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-white file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer">
+                        <p class="text-[10px] text-zinc-500 mt-1">Biarkan kosong jika hanya ingin mengubah nama atau deskripsi saja.</p>
                     </div>
                 </div>
                 <div class="p-5 border-t border-zinc-800 bg-zinc-900/50 flex gap-3 justify-end">
@@ -590,26 +596,28 @@
         ];
 
         function initDatabase() {
-            let menus = JSON.parse(localStorage.getItem('db_menus'));
+            let menus = JSON.parse(localStorage.getItem('db_menus')) || [];
+            
+            // Daftar default yang bersih (hanya menu sistem utama)
             const defaultMenus = [
                 { id: 'menu_admin_21', name: 'Admin 21', desc: 'Area kontrol khusus operasi Admin 21.', allowedUsers: [] },
-                { id: 'menu_cek_rank', name: 'Cek 5 Rank Teratas', desc: 'Modul analitik untuk mengecek posisi 5 ranking teratas secara real-time.', allowedUsers: [] },
                 { id: 'menu_bot_daftar', name: 'daftar', desc: 'untuk melakukan pendaftaran otomatis menggunakan bot', allowedUsers: [] }
             ];
 
-            if(!menus || menus.length === 0) {
-                localStorage.setItem('db_menus', JSON.stringify(defaultMenus));
-            } else {
-                let updated = false;
-                defaultMenus.forEach(dm => {
-                    if(!menus.find(m => m.id === dm.id)) { menus.push(dm); updated = true; }
-                });
-                if(updated) localStorage.setItem('db_menus', JSON.stringify(menus));
-            }
+            // BARIS FILTER PENGHAPUS OTOMATIS TELAH DIHAPUS AGAR PLUGIN TIDAK HILANG SAAT REFRESH
 
-            if(!localStorage.getItem('db_ledger')) {
-                localStorage.setItem('db_ledger', JSON.stringify([]));
+            if(menus.length === 0) {
+                menus = defaultMenus;
+            } else {
+                defaultMenus.forEach(dm => {
+                    if(!menus.find(m => m.id === dm.id)) { 
+                        menus.push(dm); 
+                    }
+                });
             }
+            
+            // Simpan menu ke localStorage tanpa menghapus plugin kustom
+            localStorage.setItem('db_menus', JSON.stringify(menus));
         }
 
         function cekAutoOffLangganan() {
@@ -1500,6 +1508,7 @@
                 document.getElementById('editPanelId').value = menu.id;
                 document.getElementById('editPanelName').value = menu.name;
                 document.getElementById('editPanelDesc').value = menu.desc;
+                if(document.getElementById('editModuleFile')) document.getElementById('editModuleFile').value = '';
                 document.getElementById('modalEditPanel').classList.remove('hidden');
                 document.getElementById('modalEditPanel').classList.add('flex');
             }
@@ -1510,17 +1519,58 @@
             document.getElementById('modalEditPanel').classList.remove('flex');
         }
 
+        // FITUR UPDATE PLUGIN / SKRIP .JS TERINTEGRASI DALAM MODAL EDIT
         window.simpanEditPanel = function(e) {
             e.preventDefault();
             let id = document.getElementById('editPanelId').value;
             let newName = document.getElementById('editPanelName').value;
             let newDesc = document.getElementById('editPanelDesc').value;
+            let fileInput = document.getElementById('editModuleFile');
+            
             let menus = JSON.parse(localStorage.getItem('db_menus')) || [];
             let index = menus.findIndex(m => m.id === id);
             if(index > -1) {
-                menus[index].name = newName; menus[index].desc = newDesc;
-                localStorage.setItem('db_menus', JSON.stringify(menus));
-                tutupModalEdit(); muatDataAksesLengkap();
+                menus[index].name = newName; 
+                menus[index].desc = newDesc;
+
+                // Jika admin menyertakan file .js baru saat melakukan edit
+                if(fileInput && fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const reader = new FileReader();
+
+                    reader.onload = function(event) {
+                        const scriptCode = event.target.result;
+                        const filename = file.name;
+
+                        fetch('http://localhost:3000/install-module', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ filename, code: scriptCode, name: newName, desc: newDesc })
+                        })
+                        .then(res => res.json())
+                        .then(result => {
+                            if(result.success && result.pluginInfo) {
+                                menus[index].script = result.pluginInfo.script;
+                                localStorage.setItem('db_menus', JSON.stringify(menus));
+                                tutupModalEdit(); 
+                                muatDataAksesLengkap();
+                                alert('Master Panel dan file skrip .js berhasil di-update!');
+                            } else {
+                                alert('Gagal memperbarui file skrip di server: ' + result.message);
+                            }
+                        })
+                        .catch(err => {
+                            alert('Gagal terhubung ke server lokal saat memperbarui skrip.');
+                        });
+                    };
+                    reader.readAsText(file);
+                } else {
+                    // Jika hanya mengubah teks nama/deskripsi tanpa mengganti file .js
+                    localStorage.setItem('db_menus', JSON.stringify(menus));
+                    tutupModalEdit(); 
+                    muatDataAksesLengkap();
+                    alert('Master Panel berhasil diperbarui!');
+                }
             }
         }
 
